@@ -16,11 +16,11 @@ namespace Extreal.Integration.Chat.WebRTC
             NativeInOutAudio inOutAudio, MediaStream inStream,
             AudioStreamTrack inTrack, MediaStream outStream)> resources;
 
-        private readonly VoiceChatConfig voiceChatConfig;
-
         private readonly Transform voiceChatContainer;
 
         private readonly AudioClip mic;
+
+        private bool mute;
 
         public NativeVoiceChatClient(
             NativePeerClient peerClient, VoiceChatConfig voiceChatConfig)
@@ -31,7 +31,7 @@ namespace Extreal.Integration.Chat.WebRTC
             resources = new Dictionary<string, (
                 NativeInOutAudio inOutAudio, MediaStream inStream,
                 AudioStreamTrack inTrack, MediaStream outStream)>();
-            this.voiceChatConfig = voiceChatConfig;
+            mute = voiceChatConfig.InitialMute;
             peerClient.AddPcCreateHook(CreatePc);
             peerClient.AddPcCloseHook(ClosePc);
 
@@ -106,7 +106,7 @@ namespace Extreal.Integration.Chat.WebRTC
             inAudio.loop = true;
             inAudio.clip = mic;
             inAudio.Play();
-            inAudio.mute = voiceChatConfig.InitialMute;
+            inAudio.mute = mute;
 
             outAudio.loop = true;
             outAudio.Play();
@@ -133,12 +133,13 @@ namespace Extreal.Integration.Chat.WebRTC
 
         public override void ToggleMute()
         {
+            mute = !mute;
             resources.Values.ToList().ForEach(resource =>
             {
                 var inAudio = resource.inOutAudio.InAudio;
-                inAudio.mute = !inAudio.mute;
+                inAudio.mute = mute;
             });
-            FireOnMuted(resources.First().Value.inOutAudio.InAudio.mute);
+            FireOnMuted(mute);
         }
 
         public override void Clear()
