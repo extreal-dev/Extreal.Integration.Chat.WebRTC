@@ -120,14 +120,27 @@ namespace Extreal.Integration.Chat.WebRTC
             {
                 return;
             }
-            resource.inOutAudio.InAudio.Stop();
-            resource.inOutAudio.OutAudio.Stop();
+
+            if (resource.inOutAudio.InAudio != null)
+            {
+                resource.inOutAudio.InAudio.Stop();
+            }
+            if (resource.inOutAudio.OutAudio != null)
+            {
+                resource.inOutAudio.OutAudio.Stop();
+            }
+            if (resource.inOutAudio.gameObject != null)
+            {
+                Object.Destroy(resource.inOutAudio.gameObject);
+            }
+
             resource.inStream.GetTracks().ToList().ForEach((track) => track.Stop());
             resource.inStream.Dispose();
             resource.inTrack.Dispose();
             resource.outStream.GetTracks().ToList().ForEach((track) => track.Stop());
             resource.outStream.Dispose();
-            Object.Destroy(resource.inOutAudio.gameObject);
+
+
             resources.Remove(id);
         }
 
