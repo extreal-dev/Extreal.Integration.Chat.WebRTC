@@ -1,21 +1,20 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using AOT;
 using Extreal.Core.Logging;
 using Extreal.Integration.Web.Common;
+using UnityEngine;
 
 namespace Extreal.Integration.Chat.WebRTC
 {
     public class WebGLTextChatClient : TextChatClient
     {
         private static readonly ELogger Logger = LoggingManager.GetLogger(nameof(WebGLTextChatClient));
-        private static readonly WebGLTextChatConfig Config = new WebGLTextChatConfig()
+        private static readonly WebGLTextChatConfig Config = new WebGLTextChatConfig
         {
-            IsDebug = Logger.IsDebug()
+            isDebug = Logger.IsDebug()
         };
-        private static readonly string JsonConfig = JsonSerializer.Serialize(Config);
+        private static readonly string JsonConfig = JsonUtility.ToJson(Config);
 
         private static WebGLTextChatClient instance;
 
@@ -37,10 +36,9 @@ namespace Extreal.Integration.Chat.WebRTC
         private static string WithPrefix(string name) => $"{nameof(WebGLTextChatClient)}#{name}";
     }
 
-    [SuppressMessage("Usage", "CC0047")]
+    [SuppressMessage("Usage", "IDE1006")]
     public class WebGLTextChatConfig
     {
-        [JsonPropertyName("isDebug")]
-        public bool IsDebug { get; set; }
+        public bool isDebug;
     }
 }

@@ -1,8 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Extreal.Core.Logging;
 using Extreal.Integration.Web.Common;
+using UnityEngine;
 
 namespace Extreal.Integration.Chat.WebRTC
 {
@@ -12,10 +11,10 @@ namespace Extreal.Integration.Chat.WebRTC
 
         public WebGLVoiceChatClient(VoiceChatConfig voiceChatConfig)
             => WebGLHelper.CallAction(WithPrefix(nameof(WebGLVoiceChatClient)),
-                JsonSerializer.Serialize(new WebGLVoiceChatConfig
+                JsonUtility.ToJson(new WebGLVoiceChatConfig
                 {
-                    InitialMute = voiceChatConfig.InitialMute,
-                    IsDebug = Logger.IsDebug()
+                    initialMute = voiceChatConfig.InitialMute,
+                    isDebug = Logger.IsDebug()
                 }));
 
         public override void ToggleMute()
@@ -29,13 +28,10 @@ namespace Extreal.Integration.Chat.WebRTC
         private static string WithPrefix(string name) => $"{nameof(WebGLVoiceChatClient)}#{name}";
     }
 
-    [SuppressMessage("Usage", "CC0047")]
+    [SuppressMessage("Usage", "IDE1006")]
     public class WebGLVoiceChatConfig
     {
-        [JsonPropertyName("initialMute")]
-        public bool InitialMute { get; set; }
-
-        [JsonPropertyName("isDebug")]
-        public bool IsDebug { get; set; }
+        public bool initialMute;
+        public bool isDebug;
     }
 }
