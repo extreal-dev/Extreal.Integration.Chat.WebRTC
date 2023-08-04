@@ -7,7 +7,6 @@ type VoiceChatConfig = {
 
 class VoiceChatClient {
     private readonly isDebug: boolean;
-    private readonly initialMute: boolean;
     private readonly getPeerClient: PeerClientProvider;
 
     private inStream: MediaStream | null;
@@ -15,9 +14,11 @@ class VoiceChatClient {
     private outAudios: Map<string, HTMLAudioElement>;
     private outStreams: Map<string, MediaStream>;
 
+    private mute: boolean;
+
     constructor(voiceChatConfig: VoiceChatConfig, getPeerClient: PeerClientProvider) {
         this.isDebug = voiceChatConfig.isDebug;
-        this.initialMute = voiceChatConfig.initialMute;
+        this.mute = voiceChatConfig.initialMute;
         this.getPeerClient = getPeerClient;
         this.inStream = null;
         this.inTrack = null;
@@ -44,7 +45,7 @@ class VoiceChatClient {
         client.inTrack = inTrack;
 
         pc.addTrack(inTrack, inStream);
-        inTrack.enabled = !this.initialMute;
+        inTrack.enabled = !this.mute;
 
         const outAudio = new Audio();
         client.outAudios.set(id, outAudio);
@@ -83,12 +84,12 @@ class VoiceChatClient {
     };
 
     public toggleMute = () => {
+        this.mute = !this.mute;
         const track = this.inTrack;
-        if (!track) {
-            return true;
+        if (track) {
+            track.enabled = !this.mute;
         }
-        track.enabled = !track.enabled;
-        return !track.enabled;
+        return this.mute;
     };
 }
 
