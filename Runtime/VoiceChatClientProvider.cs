@@ -12,8 +12,7 @@ namespace Extreal.Integration.Chat.WebRTC
             config ??= new VoiceChatConfig();
 #if !UNITY_WEBGL || UNITY_EDITOR
             return new NativeVoiceChatClient(peerClient as NativePeerClient, config);
-#endif
-#if UNITY_WEBGL && !UNITY_EDITOR
+#else
             return new WebGLVoiceChatClient(config);
 #endif
         }

@@ -10,8 +10,7 @@ namespace Extreal.Integration.Chat.WebRTC
         {
 #if !UNITY_WEBGL || UNITY_EDITOR
             return new NativeTextChatClient(peerClient as NativePeerClient);
-#endif
-#if UNITY_WEBGL && !UNITY_EDITOR
+#else
             return new WebGLTextChatClient();
 #endif
         }
