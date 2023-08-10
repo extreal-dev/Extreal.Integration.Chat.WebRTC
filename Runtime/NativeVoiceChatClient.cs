@@ -46,6 +46,7 @@ namespace Extreal.Integration.Chat.WebRTC
         {
             if (resources.ContainsKey(id))
             {
+                // Not covered by testing due to defensive implementation
                 return;
             }
 
