@@ -5,6 +5,9 @@ using UnityEngine;
 
 namespace Extreal.Integration.Chat.WebRTC
 {
+    /// <summary>
+    /// Class that logs about audio sources.
+    /// </summary>
     public class AudioSourceLogger : MonoBehaviour
     {
         private static readonly ELogger Logger = LoggingManager.GetLogger(nameof(AudioSourceLogger));

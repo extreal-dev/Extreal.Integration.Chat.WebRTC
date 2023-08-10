@@ -8,6 +8,9 @@ using Unity.WebRTC;
 
 namespace Extreal.Integration.Chat.WebRTC
 {
+    /// <summary>
+    /// Class that handles text chat client for native application.
+    /// </summary>
     public class NativeTextChatClient : TextChatClient
     {
         private static readonly ELogger Logger = LoggingManager.GetLogger(nameof(NativeTextChatClient));
@@ -16,6 +19,10 @@ namespace Extreal.Integration.Chat.WebRTC
 
         private readonly Dictionary<string, RTCDataChannel> dcDict;
 
+        /// <summary>
+        /// Creates NativeTextChatClient with peerClient.
+        /// </summary>
+        /// <param name="peerClient">Peer client.</param>
         public NativeTextChatClient(NativePeerClient peerClient)
         {
             dcDict = new Dictionary<string, RTCDataChannel>();
@@ -69,9 +76,11 @@ namespace Extreal.Integration.Chat.WebRTC
             dcDict.Remove(id);
         }
 
+        /// <inheritdoc/>
         protected override void DoSend(string message)
             => dcDict.Values.ToList().ForEach(dc => dc.Send(message));
 
+        /// <inheritdoc/>
         public override void Clear()
         {
             dcDict.Keys.ToList().ForEach(ClosePc);

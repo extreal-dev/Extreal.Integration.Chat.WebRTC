@@ -8,6 +8,9 @@ using UnityEngine;
 
 namespace Extreal.Integration.Chat.WebRTC
 {
+    /// <summary>
+    /// Class that handles voice chat client for native application.
+    /// </summary>
     public class NativeVoiceChatClient : VoiceChatClient
     {
         private static readonly ELogger Logger = LoggingManager.GetLogger(nameof(NativeVoiceChatClient));
@@ -22,6 +25,11 @@ namespace Extreal.Integration.Chat.WebRTC
 
         private bool mute;
 
+        /// <summary>
+        /// Creates NativeVoiceChatClient with peerClient and voiceChatConfig.
+        /// </summary>
+        /// <param name="peerClient">Peer client.</param>
+        /// <param name="voiceChatConfig">Voice chat config.</param>
         public NativeVoiceChatClient(
             NativePeerClient peerClient, VoiceChatConfig voiceChatConfig)
         {
@@ -147,6 +155,7 @@ namespace Extreal.Integration.Chat.WebRTC
             resources.Remove(id);
         }
 
+        /// <inheritdoc/>
         public override void ToggleMute()
         {
             mute = !mute;
@@ -158,12 +167,14 @@ namespace Extreal.Integration.Chat.WebRTC
             FireOnMuted(mute);
         }
 
+        /// <inheritdoc/>
         public override void Clear()
         {
             resources.Keys.ToList().ForEach(ClosePc);
             resources.Clear();
         }
 
+        /// <inheritdoc/>
         protected override void ReleaseManagedResources()
         {
             Microphone.End(null);

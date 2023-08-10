@@ -7,6 +7,9 @@ using UnityEngine;
 
 namespace Extreal.Integration.Chat.WebRTC
 {
+    /// <summary>
+    /// Class that handles text chat client for WebGL application.
+    /// </summary>
     public class WebGLTextChatClient : TextChatClient
     {
         private static readonly ELogger Logger = LoggingManager.GetLogger(nameof(WebGLTextChatClient));
@@ -18,6 +21,9 @@ namespace Extreal.Integration.Chat.WebRTC
 
         private static WebGLTextChatClient instance;
 
+        /// <summary>
+        /// Creates WebGLTextChatClient
+        /// </summary>
         public WebGLTextChatClient()
         {
             instance = this;
@@ -29,16 +35,24 @@ namespace Extreal.Integration.Chat.WebRTC
         private static void HandleOnDataReceived(string message, string unused)
             => instance.FireOnMessageReceived(message);
 
+        /// <inheritdoc/>
         protected override void DoSend(string message) => WebGLHelper.CallAction(WithPrefix(nameof(DoSend)), message);
 
+        /// <inheritdoc/>
         public override void Clear() => WebGLHelper.CallAction(WithPrefix(nameof(Clear)));
 
         private static string WithPrefix(string name) => $"{nameof(WebGLTextChatClient)}#{name}";
     }
 
+    /// <summary>
+    /// Class that holds config for WebGL text chat.
+    /// </summary>
     [SuppressMessage("Usage", "IDE1006")]
     public class WebGLTextChatConfig
     {
+        /// <summary>
+        /// Indicates if debug logs are output.
+        /// </summary>
         public bool isDebug;
     }
 }
