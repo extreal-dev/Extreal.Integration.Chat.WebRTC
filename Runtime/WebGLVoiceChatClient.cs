@@ -9,6 +9,7 @@ namespace Extreal.Integration.Chat.WebRTC
     {
         private static readonly ELogger Logger = LoggingManager.GetLogger(nameof(WebGLVoiceChatClient));
 
+        [SuppressMessage("Style", "CC0057")]
         public WebGLVoiceChatClient(VoiceChatConfig voiceChatConfig)
             => WebGLHelper.CallAction(WithPrefix(nameof(WebGLVoiceChatClient)),
                 JsonUtility.ToJson(new WebGLVoiceChatConfig

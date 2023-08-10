@@ -51,8 +51,10 @@ namespace Extreal.Integration.Chat.WebRTC
 
             var inOutAudio = GetInOutAudio();
 
-            var inTrack = new AudioStreamTrack(inOutAudio.InAudio);
-            inTrack.Loopback = false;
+            var inTrack = new AudioStreamTrack(inOutAudio.InAudio)
+            {
+                Loopback = false
+            };
             var inStream = new MediaStream();
             pc.AddTrack(inTrack, inStream);
             if (Logger.IsDebug())

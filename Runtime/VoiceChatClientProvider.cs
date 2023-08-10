@@ -5,7 +5,7 @@ namespace Extreal.Integration.Chat.WebRTC
 {
     public class VoiceChatClientProvider
     {
-        [SuppressMessage("Style", "CC0038")]
+        [SuppressMessage("Style", "CC0038"), SuppressMessage("Style", "CC0057"), SuppressMessage("Style", "IDE0060")]
         public static VoiceChatClient Provide(
             PeerClient peerClient, VoiceChatConfig config = null)
         {

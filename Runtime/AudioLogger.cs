@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using Extreal.Core.Logging;
 using UnityEngine;
 
@@ -14,8 +15,10 @@ namespace Extreal.Integration.Chat.WebRTC
 
         private AudioSource audioSource;
 
+        [SuppressMessage("Style", "CC0068")]
         private void Start() => audioSource = GetComponent<AudioSource>();
 
+        [SuppressMessage("Style", "CC0068")]
         private void Update()
         {
             if (Logger.IsDebug())
