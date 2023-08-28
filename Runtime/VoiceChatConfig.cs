@@ -11,7 +11,7 @@ namespace Extreal.Integration.Chat.WebRTC
         /// Initial status of mute.
         /// </summary>
         /// <value>True if initial muted, false otherwise.</value>
-        public bool InitialMute { get; private set; }
+        public bool InitialMute { get; }
 
         /// <summary>
         /// Creates VoiceChatConfig with initialMute.
