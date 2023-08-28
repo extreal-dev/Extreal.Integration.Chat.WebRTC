@@ -151,7 +151,6 @@ namespace Extreal.Integration.Chat.WebRTC
             resource.outStream.GetTracks().ToList().ForEach((track) => track.Stop());
             resource.outStream.Dispose();
 
-
             resources.Remove(id);
         }
 
