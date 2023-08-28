@@ -101,8 +101,8 @@ namespace Extreal.Integration.Chat.WebRTC
         private NativeInOutAudio GetInOutAudio()
         {
             var inOutAudioGo = new GameObject("InOutAudio");
-            inOutAudioGo.transform.SetParent(voiceChatContainer);
             var inOutAudio = inOutAudioGo.AddComponent<NativeInOutAudio>();
+            inOutAudioGo.transform.SetParent(voiceChatContainer);
 
             var inAudioGo = new GameObject("InAudio");
             var inAudio = inAudioGo.AddComponent<AudioSource>();
