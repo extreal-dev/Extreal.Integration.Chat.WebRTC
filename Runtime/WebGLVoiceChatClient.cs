@@ -44,14 +44,7 @@ namespace Extreal.Integration.Chat.WebRTC
     [SuppressMessage("Usage", "IDE1006")]
     public class WebGLVoiceChatConfig
     {
-        /// <summary>
-        /// Initial status of mute.
-        /// </summary>
         public bool initialMute;
-
-        /// <summary>
-        /// Indicates if debug logs are output.
-        /// </summary>
         public bool isDebug;
     }
 }

@@ -44,15 +44,9 @@ namespace Extreal.Integration.Chat.WebRTC
         private static string WithPrefix(string name) => $"{nameof(WebGLTextChatClient)}#{name}";
     }
 
-    /// <summary>
-    /// Class that holds config for WebGL text chat.
-    /// </summary>
     [SuppressMessage("Usage", "IDE1006")]
     public class WebGLTextChatConfig
     {
-        /// <summary>
-        /// Indicates if debug logs are output.
-        /// </summary>
         public bool isDebug;
     }
 }
