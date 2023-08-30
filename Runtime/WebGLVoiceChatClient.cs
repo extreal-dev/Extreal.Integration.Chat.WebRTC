@@ -16,14 +16,16 @@ namespace Extreal.Integration.Chat.WebRTC
         /// Creates WebGLVoiceChatClient with voiceChatConfig.
         /// </summary>
         /// <param name="voiceChatConfig">Voice chat config.</param>
-        [SuppressMessage("Style", "CC0057")]
         public WebGLVoiceChatClient(VoiceChatConfig voiceChatConfig)
-            => WebGLHelper.CallAction(WithPrefix(nameof(WebGLVoiceChatClient)),
-                JsonSerializer.Serialize(new WebGLVoiceChatConfig
-                {
-                    initialMute = voiceChatConfig.InitialMute,
-                    isDebug = Logger.IsDebug()
-                }));
+        {
+            var config = new WebGLVoiceChatConfig
+            {
+                initialMute = voiceChatConfig.InitialMute,
+                isDebug = Logger.IsDebug()
+            };
+            var jsonVoiceJsonChatConfig = JsonSerializer.Serialize(config);
+            WebGLHelper.CallAction(WithPrefix(nameof(WebGLVoiceChatClient)), jsonVoiceJsonChatConfig);
+        }
 
         /// <inheritdoc/>
         public override void ToggleMute()
