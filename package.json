@@ -1,0 +1,24 @@
+{
+  "name": "jp.co.tis.extreal.integration.chat.webrtc",
+  "version": "1.2.0-next.2",
+  "displayName": "Extreal.Integration.Chat.WebRTC",
+  "unity": "2022.3",
+  "author": {
+    "name": "TIS Inc."
+  },
+  "dependencies": {
+    "com.unity.webrtc": "3.0.0-pre.6",
+    "com.cysharp.unitask": "2.3.3",
+    "com.neuecc.unirx": "7.1.0",
+    "jp.co.tis.extreal.core.logging": "1.2.0-next.1",
+    "jp.co.tis.extreal.core.common": "1.1.0-next.4",
+    "jp.co.tis.extreal.integration.web.common": "1.0.0-next.1",
+    "jp.co.tis.extreal.integration.p2p.webrtc": "1.0.0-next.3"
+  },
+  "samples": [
+    {
+      "displayName": "MVS",
+      "path": "Samples~/MVS"
+    }
+  ]
+}
