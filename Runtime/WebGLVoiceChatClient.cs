@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿#if UNITY_WEBGL && !UNITY_EDITOR
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using Extreal.Core.Logging;
 using Extreal.Integration.Web.Common;
@@ -50,3 +51,4 @@ namespace Extreal.Integration.Chat.WebRTC
         public bool isDebug { get; set; }
     }
 }
+#endif
