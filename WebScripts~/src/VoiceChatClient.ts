@@ -7,6 +7,7 @@ type VoiceChatConfig = {
 
 class VoiceChatClient {
     private readonly isDebug: boolean;
+    private readonly voiceChatConfig: VoiceChatConfig;
     private readonly getPeerClient: PeerClientProvider;
 
     private inStreams: Map<string, MediaStream>;
@@ -18,6 +19,7 @@ class VoiceChatClient {
 
     constructor(voiceChatConfig: VoiceChatConfig, getPeerClient: PeerClientProvider) {
         this.isDebug = voiceChatConfig.isDebug;
+        this.voiceChatConfig = voiceChatConfig;
         this.mute = voiceChatConfig.initialMute;
         this.getPeerClient = getPeerClient;
         this.inStreams = new Map();
@@ -81,6 +83,7 @@ class VoiceChatClient {
         [...this.outAudios.keys()].forEach(this.closePc);
         this.outAudios.clear();
         this.outStreams.clear();
+        this.mute = this.voiceChatConfig.initialMute;
     };
 
     public toggleMute = () => {
