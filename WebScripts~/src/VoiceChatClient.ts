@@ -7,10 +7,11 @@ type VoiceChatConfig = {
 
 class VoiceChatClient {
     private readonly isDebug: boolean;
+    private readonly voiceChatConfig: VoiceChatConfig;
     private readonly getPeerClient: PeerClientProvider;
 
-    private inStream: MediaStream | null;
-    private inTrack: MediaStreamTrack | null;
+    private inStreams: Map<string, MediaStream>;
+    private inTracks: Map<string, MediaStreamTrack>;
     private outAudios: Map<string, HTMLAudioElement>;
     private outStreams: Map<string, MediaStream>;
 
@@ -18,10 +19,11 @@ class VoiceChatClient {
 
     constructor(voiceChatConfig: VoiceChatConfig, getPeerClient: PeerClientProvider) {
         this.isDebug = voiceChatConfig.isDebug;
+        this.voiceChatConfig = voiceChatConfig;
         this.mute = voiceChatConfig.initialMute;
         this.getPeerClient = getPeerClient;
-        this.inStream = null;
-        this.inTrack = null;
+        this.inStreams = new Map();
+        this.inTracks = new Map();
         this.outAudios = new Map();
         this.outStreams = new Map();
         this.getPeerClient().addPcCreateHook(this.createPc);
@@ -40,9 +42,9 @@ class VoiceChatClient {
         const client = this;
 
         const inStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        client.inStream = inStream;
+        client.inStreams.set(id, inStream);
         const inTrack = inStream.getAudioTracks()[0];
-        client.inTrack = inTrack;
+        client.inTracks.set(id, inTrack);
 
         pc.addTrack(inTrack, inStream);
         inTrack.enabled = !this.mute;
@@ -73,22 +75,22 @@ class VoiceChatClient {
     };
 
     public clear = () => {
-        if (this.inStream !== null) {
-            this.inStream.getTracks().forEach((track) => track.stop());
-            this.inStream = null;
-        }
-        this.inTrack = null;
+        [...this.inStreams.values()].forEach((stream) => {
+          stream.getTracks().forEach((track) => track.stop());
+        });
+        this.inStreams.clear();
+        this.inTracks.clear();
         [...this.outAudios.keys()].forEach(this.closePc);
         this.outAudios.clear();
         this.outStreams.clear();
+        this.mute = this.voiceChatConfig.initialMute;
     };
 
     public toggleMute = () => {
         this.mute = !this.mute;
-        const track = this.inTrack;
-        if (track) {
-            track.enabled = !this.mute;
-        }
+        [...this.inTracks.values()].forEach((track) => {
+          track.enabled = !this.mute;
+        });
         return this.mute;
     };
 }
