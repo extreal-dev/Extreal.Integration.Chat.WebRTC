@@ -1,4 +1,4 @@
-﻿#if UNITY_WEBGL && !UNITY_EDITOR
+﻿#if UNITY_WEBGL
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using Extreal.Core.Logging;

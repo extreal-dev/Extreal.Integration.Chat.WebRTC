@@ -15,6 +15,7 @@ namespace Extreal.Integration.Chat.WebRTC
     {
         private static readonly ELogger Logger = LoggingManager.GetLogger(nameof(NativeVoiceChatClient));
 
+        private readonly VoiceChatConfig voiceChatConfig;
         private readonly Dictionary<string, (
             NativeInOutAudio inOutAudio, MediaStream inStream,
             AudioStreamTrack inTrack, MediaStream outStream)> resources;
@@ -39,6 +40,7 @@ namespace Extreal.Integration.Chat.WebRTC
             resources = new Dictionary<string, (
                 NativeInOutAudio inOutAudio, MediaStream inStream,
                 AudioStreamTrack inTrack, MediaStream outStream)>();
+            this.voiceChatConfig = voiceChatConfig;
             mute = voiceChatConfig.InitialMute;
             peerClient.AddPcCreateHook(CreatePc);
             peerClient.AddPcCloseHook(ClosePc);
@@ -171,6 +173,7 @@ namespace Extreal.Integration.Chat.WebRTC
         {
             resources.Keys.ToList().ForEach(ClosePc);
             resources.Clear();
+            mute = voiceChatConfig.InitialMute;
         }
 
         /// <inheritdoc/>

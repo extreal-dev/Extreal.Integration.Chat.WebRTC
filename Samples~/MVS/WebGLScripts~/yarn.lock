@@ -3,23 +3,29 @@
 
 
 "@extreal-dev/extreal.integration.chat.webrtc@../../../../../../Packages/Extreal.Integration.Chat.WebRTC/WebScripts~/":
-  version "0.0.1"
+  version "0.0.10"
   dependencies:
-    "@extreal-dev/extreal.integration.p2p.webrtc" "^0.0.5"
-    "@extreal-dev/extreal.integration.web.common" "^0.0.6"
+    "@extreal-dev/extreal.integration.p2p.webrtc" "^0.0.15"
+    "@extreal-dev/extreal.integration.web.common" "^0.0.9"
 
-"@extreal-dev/extreal.integration.p2p.webrtc@^0.0.5":
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/@extreal-dev/extreal.integration.p2p.webrtc/-/extreal.integration.p2p.webrtc-0.0.5.tgz#1a2148ec340ca3ea5ae84b2a5a8f70b45ae1a59b"
-  integrity sha512-jxc2bPF6qc8zPp8N0qoUM0LhVsoMvpiGT7RufOZbbciOIkgYh03pFvvsgiCSD32OEhIgDocqOe67rJ2xLHdFBQ==
+"@extreal-dev/extreal.integration.p2p.webrtc@^0.0.15":
+  version "0.0.15"
+  resolved "https://registry.yarnpkg.com/@extreal-dev/extreal.integration.p2p.webrtc/-/extreal.integration.p2p.webrtc-0.0.15.tgz#08c6e8e8c693cef58e3bbecaa3d3599d485776a1"
+  integrity sha512-VW5ozr6vpanw+x4I8q/WBxSaGSF4wwfrgkh/jp4+m5Fajof+yXiMZseslG5WXZFIyIXkmNjsPkhYD+9AFommhg==
   dependencies:
-    "@extreal-dev/extreal.integration.web.common" "^0.0.6"
+    "@extreal-dev/extreal.integration.web.common" "^0.0.9"
     socket.io-client "^4.7.1"
 
-"@extreal-dev/extreal.integration.web.common@^0.0.6":
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/@extreal-dev/extreal.integration.web.common/-/extreal.integration.web.common-0.0.6.tgz#5922a832fbca398f389cda076ded0c6ac8f2b58e"
-  integrity sha512-otazLuPKlNUDcjfYhMSAjE3cLgMvfD+zxrCpm5wSPaMHzjtCxC4p1TUNud4qP1oY+uMhopoEBQqFJtk0TdGVCw==
+"@extreal-dev/extreal.integration.p2p.webrtc@file:../../../../../../Packages/Extreal.Integration.P2P.WebRTC/WebScripts~":
+  version "0.0.15"
+  dependencies:
+    "@extreal-dev/extreal.integration.web.common" "^0.0.9"
+    socket.io-client "^4.7.1"
+
+"@extreal-dev/extreal.integration.web.common@^0.0.9":
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/@extreal-dev/extreal.integration.web.common/-/extreal.integration.web.common-0.0.9.tgz#10e5674e744e6d835bbc6f197fbf14790eae608e"
+  integrity sha512-HVtXEX7ukxv265SKcHfk1y1FefeWlQrotF7YnJn/gyPw9qp9hTjZ/qVXr0byk8hIC0pXrFYOux/sqgAbrAupiw==
 
 "@jridgewell/gen-mapping@^0.3.0":
   version "0.3.3"
