@@ -28,7 +28,7 @@
     - Run
       - Scene: MVS/App/App
   - WebGL
-    - Run from `Build And Run`.
+    - See [README](https://github.com/extreal-dev/Extreal.Dev/blob/main/WebGLBuild/README.md) to run WebGL application in local environment.
 
 ## Test cases for manual testing
 
