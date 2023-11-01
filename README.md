@@ -21,7 +21,7 @@
 - Open `Build Settings` and change the platform to `WebGL`.
 - Select `Dev` from `Player Settings > Resolution and Presentation > WebGL Template`.
 - Add all scenes in MVS to `Scenes In Build`.
-- See [README](https://github.com/extreal-dev/Extreal.Integration.P2P.WebRTC/SignalingServer~/README.md) to start a signaling server.
+- See [README](https://github.com/extreal-dev/Extreal.Integration.P2P.WebRTC/blob/main/SignalingServer~/README.md) to start a signaling server.
 - Play
   - Native
     - Open multiple Unity editors using ParrelSync.
