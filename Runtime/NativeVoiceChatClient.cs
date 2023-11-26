@@ -45,10 +45,13 @@ namespace Extreal.Integration.Chat.WebRTC
             peerClient.AddPcCreateHook(CreatePc);
             peerClient.AddPcCloseHook(ClosePc);
 
-            mic = Microphone.Start(null, true, 1, 48000);
-            while (!(Microphone.GetPosition(null) > 0))
+            if (Microphone.devices.Length > 0)
             {
-                // do nothing
+                mic = Microphone.Start(null, true, 1, 48000);
+            }
+            if (Logger.IsDebug())
+            {
+                Logger.LogDebug(HasMicrophone() ? "Microphone found" : "Microphone not found");
             }
         }
 
@@ -62,15 +65,20 @@ namespace Extreal.Integration.Chat.WebRTC
 
             var inOutAudio = GetInOutAudio();
 
-            var inTrack = new AudioStreamTrack(inOutAudio.InAudio)
+            MediaStream inStream = null;
+            AudioStreamTrack inTrack = null;
+            if (HasMicrophone())
             {
-                Loopback = false
-            };
-            var inStream = new MediaStream();
-            pc.AddTrack(inTrack, inStream);
-            if (Logger.IsDebug())
-            {
-                Logger.LogDebug($"AddTrack(IN): id={id}");
+                inTrack = new AudioStreamTrack(inOutAudio.InAudio)
+                {
+                    Loopback = false
+                };
+                inStream = new MediaStream();
+                pc.AddTrack(inTrack, inStream);
+                if (Logger.IsDebug())
+                {
+                    Logger.LogDebug($"AddTrack(IN): id={id}");
+                }
             }
 
             var outStream = new MediaStream();
@@ -106,20 +114,24 @@ namespace Extreal.Integration.Chat.WebRTC
             var inOutAudio = inOutAudioGo.AddComponent<NativeInOutAudio>();
             inOutAudioGo.transform.SetParent(voiceChatContainer);
 
-            var inAudioGo = new GameObject("InAudio");
-            var inAudio = inAudioGo.AddComponent<AudioSource>();
-            inAudioGo.transform.SetParent(inOutAudioGo.transform);
+            AudioSource inAudio = null;
+            if (HasMicrophone())
+            {
+                var inAudioGo = new GameObject("InAudio");
+                inAudio = inAudioGo.AddComponent<AudioSource>();
+                inAudioGo.transform.SetParent(inOutAudioGo.transform);
+
+                inAudio.loop = true;
+                inAudio.clip = mic;
+                inAudio.Play();
+                inAudio.mute = mute;
+            }
 
             var outAudioGo = new GameObject("OutAudio", typeof(AudioSourceLogger));
             var outAudio = outAudioGo.AddComponent<AudioSource>();
             outAudioGo.transform.SetParent(inOutAudioGo.transform);
 
             inOutAudio.Initialize(inAudio, outAudio);
-
-            inAudio.loop = true;
-            inAudio.clip = mic;
-            inAudio.Play();
-            inAudio.mute = mute;
 
             outAudio.loop = true;
             outAudio.Play();
@@ -147,18 +159,37 @@ namespace Extreal.Integration.Chat.WebRTC
                 Object.Destroy(resource.inOutAudio.gameObject);
             }
 
-            resource.inStream.GetTracks().ToList().ForEach((track) => track.Stop());
-            resource.inStream.Dispose();
-            resource.inTrack.Dispose();
-            resource.outStream.GetTracks().ToList().ForEach((track) => track.Stop());
-            resource.outStream.Dispose();
+            if (resource.inStream != null)
+            {
+                resource.inStream.GetTracks().ToList().ForEach((track) => track.Stop());
+                resource.inStream.Dispose();
+            }
+
+            if (resource.inTrack != null)
+            {
+                resource.inTrack.Dispose();
+            }
+
+            if (resource.outStream != null)
+            {
+                resource.outStream.GetTracks().ToList().ForEach((track) => track.Stop());
+                resource.outStream.Dispose();
+            }
 
             resources.Remove(id);
         }
 
         /// <inheritdoc/>
+        public override bool HasMicrophone() => mic != null;
+
+        /// <inheritdoc/>
         public override void ToggleMute()
         {
+            if (!HasMicrophone())
+            {
+                return;
+            }
+
             mute = !mute;
             resources.Values.ToList().ForEach(resource =>
             {

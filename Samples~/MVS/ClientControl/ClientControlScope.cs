@@ -40,6 +40,8 @@ namespace Extreal.Integration.Chat.WebRTC.MVS.ClientControl
             var voiceChatClient = VoiceChatClientProvider.Provide(peerClient, voiceChatConfig);
             builder.RegisterComponent(voiceChatConfig);
             builder.RegisterComponent(voiceChatClient);
+
+            builder.RegisterEntryPoint<ClientControlPresenter>();
         }
     }
 }

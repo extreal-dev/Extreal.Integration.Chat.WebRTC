@@ -9,6 +9,7 @@ class VoiceChatClient {
     private readonly isDebug: boolean;
     private readonly voiceChatConfig: VoiceChatConfig;
     private readonly getPeerClient: PeerClientProvider;
+    private readonly hasMicrophone: boolean;
 
     private inStreams: Map<string, MediaStream>;
     private inTracks: Map<string, MediaStreamTrack>;
@@ -17,17 +18,21 @@ class VoiceChatClient {
 
     private mute: boolean;
 
-    constructor(voiceChatConfig: VoiceChatConfig, getPeerClient: PeerClientProvider) {
+    constructor(voiceChatConfig: VoiceChatConfig, getPeerClient: PeerClientProvider, hasMicrophone: boolean) {
         this.isDebug = voiceChatConfig.isDebug;
         this.voiceChatConfig = voiceChatConfig;
         this.mute = voiceChatConfig.initialMute;
         this.getPeerClient = getPeerClient;
+        this.hasMicrophone = hasMicrophone;
         this.inStreams = new Map();
         this.inTracks = new Map();
         this.outAudios = new Map();
         this.outStreams = new Map();
         this.getPeerClient().addPcCreateHook(this.createPc);
         this.getPeerClient().addPcCloseHook(this.closePc);
+        if (this.isDebug) {
+            console.log(hasMicrophone ? "Microphone found" : "Microphone not found");
+        }
     }
 
     private createPc = async (id: string, isOffer: boolean, pc: RTCPeerConnection) => {
@@ -41,13 +46,14 @@ class VoiceChatClient {
 
         const client = this;
 
-        const inStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        client.inStreams.set(id, inStream);
-        const inTrack = inStream.getAudioTracks()[0];
-        client.inTracks.set(id, inTrack);
-
-        pc.addTrack(inTrack, inStream);
-        inTrack.enabled = !this.mute;
+        if (this.hasMicrophone) {
+            const inStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            client.inStreams.set(id, inStream);
+            const inTrack = inStream.getAudioTracks()[0];
+            client.inTracks.set(id, inTrack);
+            pc.addTrack(inTrack, inStream);
+            inTrack.enabled = !this.mute;
+        }
 
         const outAudio = new Audio();
         client.outAudios.set(id, outAudio);
@@ -62,6 +68,12 @@ class VoiceChatClient {
     };
 
     private closePc = (id: string) => {
+        const inStream = this.inStreams.get(id);
+        if (inStream) {
+            inStream.getTracks().forEach((track) => track.stop());
+            this.inStreams.delete(id);
+        }
+        this.inTracks.delete(id);
         const outAudio = this.outAudios.get(id);
         if (outAudio) {
             outAudio.pause();
@@ -75,12 +87,9 @@ class VoiceChatClient {
     };
 
     public clear = () => {
-        [...this.inStreams.values()].forEach((stream) => {
-          stream.getTracks().forEach((track) => track.stop());
-        });
+        [...this.outAudios.keys()].forEach(this.closePc);
         this.inStreams.clear();
         this.inTracks.clear();
-        [...this.outAudios.keys()].forEach(this.closePc);
         this.outAudios.clear();
         this.outStreams.clear();
         this.mute = this.voiceChatConfig.initialMute;

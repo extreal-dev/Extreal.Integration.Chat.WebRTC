@@ -32,6 +32,12 @@ namespace Extreal.Integration.Chat.WebRTC
         protected void FireOnMuted(bool muted) => onMuted.OnNext(muted);
 
         /// <summary>
+        /// Returns whether or not a microphone is available.
+        /// </summary>
+        /// <returns>True if it is available, false otherwise</returns>
+        public abstract bool HasMicrophone();
+
+        /// <summary>
         /// Toggles mute or not.
         /// </summary>
         public abstract void ToggleMute();

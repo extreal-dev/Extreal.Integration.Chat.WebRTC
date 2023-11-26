@@ -28,9 +28,20 @@ namespace Extreal.Integration.Chat.WebRTC
             WebGLHelper.CallAction(WithPrefix(nameof(WebGLVoiceChatClient)), jsonVoiceJsonChatConfig);
         }
 
+        public override bool HasMicrophone()
+        {
+            var hasMicrophone = WebGLHelper.CallFunction(WithPrefix(nameof(HasMicrophone)));
+            return bool.Parse(hasMicrophone);
+        }
+
         /// <inheritdoc/>
         public override void ToggleMute()
         {
+            if (!HasMicrophone())
+            {
+                return;
+            }
+
             var muted = WebGLHelper.CallFunction(WithPrefix(nameof(ToggleMute)));
             FireOnMuted(bool.Parse(muted));
         }
