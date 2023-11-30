@@ -43,6 +43,12 @@ namespace Extreal.Integration.Chat.WebRTC
         public abstract void ToggleMute();
 
         /// <summary>
+        /// Sets microphone volume.
+        /// </summary>
+        /// <param name="volume">volume to set</param>
+        public abstract void SetMicVolume(float volume);
+
+        /// <summary>
         /// Clears the status of this instance.
         /// </summary>
         public abstract void Clear();

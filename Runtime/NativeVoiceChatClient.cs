@@ -25,6 +25,7 @@ namespace Extreal.Integration.Chat.WebRTC
         private readonly AudioClip mic;
 
         private bool mute;
+        private float micVolume;
 
         /// <summary>
         /// Creates NativeVoiceChatClient with peerClient and voiceChatConfig.
@@ -64,6 +65,8 @@ namespace Extreal.Integration.Chat.WebRTC
             }
 
             var inOutAudio = GetInOutAudio();
+
+            inOutAudio.InAudio.volume = micVolume;
 
             MediaStream inStream = null;
             AudioStreamTrack inTrack = null;
@@ -197,6 +200,17 @@ namespace Extreal.Integration.Chat.WebRTC
                 inAudio.mute = mute;
             });
             FireOnMuted(mute);
+        }
+
+        /// <inheritdoc/>
+        public override void SetMicVolume(float volume)
+        {
+            micVolume = volume;
+            resources.Values.ToList().ForEach(resource =>
+            {
+                var inAudio = resource.inOutAudio.InAudio;
+                inAudio.volume = micVolume;
+            });
         }
 
         /// <inheritdoc/>
