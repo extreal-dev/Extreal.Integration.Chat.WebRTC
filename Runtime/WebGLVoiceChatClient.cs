@@ -50,6 +50,9 @@ namespace Extreal.Integration.Chat.WebRTC
         public override void SetMicVolume(float volume) => throw new System.NotImplementedException();
 
         /// <inheritdoc/>
+        public override void SetSpeakersVolume(float volume) => throw new System.NotImplementedException();
+
+        /// <inheritdoc/>
         public override void Clear() => WebGLHelper.CallAction(WithPrefix(nameof(Clear)));
 
         private static string WithPrefix(string name) => $"{nameof(WebGLVoiceChatClient)}#{name}";

@@ -26,6 +26,7 @@ namespace Extreal.Integration.Chat.WebRTC
 
         private bool mute;
         private float micVolume;
+        private float speakersVolume;
 
         /// <summary>
         /// Creates NativeVoiceChatClient with peerClient and voiceChatConfig.
@@ -210,6 +211,17 @@ namespace Extreal.Integration.Chat.WebRTC
             {
                 var inAudio = resource.inOutAudio.InAudio;
                 inAudio.volume = micVolume;
+            });
+        }
+
+        /// <inheritdoc/>
+        public override void SetSpeakersVolume(float volume)
+        {
+            speakersVolume = volume;
+            resources.Values.ToList().ForEach(resource =>
+            {
+                var outAudio = resource.inOutAudio.OutAudio;
+                outAudio.volume = speakersVolume;
             });
         }
 
