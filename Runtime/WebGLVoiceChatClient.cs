@@ -47,7 +47,14 @@ namespace Extreal.Integration.Chat.WebRTC
         }
 
         /// <inheritdoc/>
-        public override void SetMicVolume(float volume) => throw new System.NotImplementedException();
+        public override void SetMicVolume(float volume)
+        {
+            if (!HasMicrophone())
+            {
+                return;
+            }
+            WebGLHelper.CallAction(WithPrefix(nameof(SetMicVolume)), volume.ToString());
+        }
 
         /// <inheritdoc/>
         public override void SetSpeakersVolume(float volume) => throw new System.NotImplementedException();

@@ -25,6 +25,8 @@ class VoiceChatAdapter {
 
         addFunction(this.withPrefix("ToggleMute"), () => this.getVoiceChatClient().toggleMute().toString());
 
+        addAction(this.withPrefix("SetMicVolume"), (volume: string) => this.getVoiceChatClient().setMicVolume(Number(volume)));
+
         addAction(this.withPrefix("Clear"), () => this.getVoiceChatClient().clear());
     };
 

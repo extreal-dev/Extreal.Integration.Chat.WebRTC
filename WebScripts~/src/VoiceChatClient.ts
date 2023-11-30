@@ -17,11 +17,16 @@ class VoiceChatClient {
     private outStreams: Map<string, MediaStream>;
 
     private mute: boolean;
+    private micVolume: number;
+
+    private audioContext: AudioContext;
+    private micGainNode: GainNode;
 
     constructor(voiceChatConfig: VoiceChatConfig, getPeerClient: PeerClientProvider, hasMicrophone: boolean) {
         this.isDebug = voiceChatConfig.isDebug;
         this.voiceChatConfig = voiceChatConfig;
         this.mute = voiceChatConfig.initialMute;
+        this.micVolume = 1.0;
         this.getPeerClient = getPeerClient;
         this.hasMicrophone = hasMicrophone;
         this.inStreams = new Map();
@@ -33,6 +38,8 @@ class VoiceChatClient {
         if (this.isDebug) {
             console.log(hasMicrophone ? "Microphone found" : "Microphone not found");
         }
+        this.audioContext = new AudioContext();
+        this.micGainNode = this.audioContext.createGain();
     }
 
     private createPc = async (id: string, isOffer: boolean, pc: RTCPeerConnection) => {
@@ -48,11 +55,18 @@ class VoiceChatClient {
 
         if (this.hasMicrophone) {
             const inStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+            var source = client.audioContext.createMediaStreamSource(inStream);
+            source.connect(client.micGainNode);
+            client.micGainNode.connect(client.audioContext.destination);
+
             client.inStreams.set(id, inStream);
             const inTrack = inStream.getAudioTracks()[0];
             client.inTracks.set(id, inTrack);
             pc.addTrack(inTrack, inStream);
             inTrack.enabled = !this.mute;
+
+            client.micGainNode.gain.value = client.micVolume;
         }
 
         const outAudio = new Audio();
@@ -102,6 +116,11 @@ class VoiceChatClient {
         });
         return this.mute;
     };
+
+    public setMicVolume = (volume: number) => {
+        this.micVolume = volume;
+        this.micGainNode.gain.setValueAtTime(this.micVolume, this.audioContext.currentTime);
+    }
 }
 
 export { VoiceChatClient };
