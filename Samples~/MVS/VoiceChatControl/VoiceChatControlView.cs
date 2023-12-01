@@ -12,12 +12,17 @@ namespace Extreal.Integration.Chat.WebRTC.MVS.Controls.VoiceChatControl
         [SerializeField] private TMP_Text mutedString;
         [SerializeField] private TMP_Text micVolumeText;
         [SerializeField] private Slider micVolumeSlider;
+        [SerializeField] private TMP_Text speakersVolumeText;
+        [SerializeField] private Slider speakersVolumeSlider;
 
         public IObservable<Unit> OnMuteButtonClicked
             => muteButton.OnClickAsObservable().TakeUntilDestroy(this);
 
         public IObservable<float> OnMicVolumeSliderChanged
-           => micVolumeSlider.OnValueChangedAsObservable().TakeUntilDestroy(this);
+            => micVolumeSlider.OnValueChangedAsObservable().TakeUntilDestroy(this);
+
+        public IObservable<float> OnSpeakersVolumeSliderChanged
+            => speakersVolumeSlider.OnValueChangedAsObservable().TakeUntilDestroy(this);
 
         private string muteOffButtonLabel;
         private string muteOnButtonLabel;
@@ -28,6 +33,7 @@ namespace Extreal.Integration.Chat.WebRTC.MVS.Controls.VoiceChatControl
             muteOnButtonLabel = "ON";
             ToggleMute(initialMute);
             SetMicVolumeText(micVolumeSlider.value);
+            SetSpeakersVolumeText(speakersVolumeSlider.value);
         }
 
         public void ToggleMute(bool isMute)
@@ -35,5 +41,8 @@ namespace Extreal.Integration.Chat.WebRTC.MVS.Controls.VoiceChatControl
 
         public void SetMicVolumeText(float volume)
             => micVolumeText.text = $"Mic volume: {volume:f2}";
+
+        public void SetSpeakersVolumeText(float volume)
+            => speakersVolumeText.text = $"Speakers volume: {volume:f2}";
     }
 }

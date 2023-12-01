@@ -42,6 +42,14 @@ namespace Extreal.Integration.Chat.WebRTC.MVS.Controls.VoiceChatControl
                 })
                 .AddTo(disposables);
 
+            voiceChatControlView.OnSpeakersVolumeSliderChanged
+                .Subscribe(volume =>
+                {
+                    voiceChatClient.SetSpeakersVolume(volume);
+                    voiceChatControlView.SetSpeakersVolumeText(volume);
+                })
+                .AddTo(disposables);
+
             voiceChatControlView.Initialize(voiceChatConfig.InitialMute);
         }
 
