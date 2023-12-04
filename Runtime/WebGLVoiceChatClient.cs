@@ -58,16 +58,18 @@ namespace Extreal.Integration.Chat.WebRTC
         }
 
         /// <inheritdoc/>
-        public override void SetSpeakersVolume(float volume) => throw new System.NotImplementedException();
+        public override void SetSpeakersVolume(float volume)
+        {
+        }
 
         /// <inheritdoc/>
         public override void Clear() => WebGLHelper.CallAction(WithPrefix(nameof(Clear)));
 
         /// <inheritdoc/>
-        public override float LocalAudioLevel => throw new System.NotImplementedException();
+        public override float LocalAudioLevel => -80f;
 
         /// <inheritdoc/>
-        public override IReadOnlyDictionary<string, float> RemoteAudioLevelList => throw new System.NotImplementedException();
+        public override IReadOnlyDictionary<string, float> RemoteAudioLevelList => new Dictionary<string, float>();
 
         private static string WithPrefix(string name) => $"{nameof(WebGLVoiceChatClient)}#{name}";
     }
