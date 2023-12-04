@@ -266,11 +266,11 @@ namespace Extreal.Integration.Chat.WebRTC
             }
         }
 
-        private float GetAudioLevelDB(AudioSource audioSource, float referenceValue = 1f)
+        private float GetAudioLevelDB(AudioSource audioSource)
         {
             audioSource.GetOutputData(samples, 0);
             var audioLevel = samples.Average(Mathf.Abs);
-            var dB = Mathf.Clamp(20 * Mathf.Log10(audioLevel / referenceValue), -80f, 0f);
+            var dB = Mathf.Clamp(20 * Mathf.Log10(audioLevel), -80f, 0f);
             return dB;
         }
 
