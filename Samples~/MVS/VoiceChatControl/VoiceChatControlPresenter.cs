@@ -1,16 +1,19 @@
-﻿using Extreal.Core.Common.System;
+﻿using System.Text;
+using Extreal.Core.Common.System;
 using UniRx;
 using VContainer.Unity;
 
 namespace Extreal.Integration.Chat.WebRTC.MVS.Controls.VoiceChatControl
 {
-    public class VoiceChatControlPresenter : DisposableBase, IInitializable
+    public class VoiceChatControlPresenter : DisposableBase, IInitializable, ITickable
     {
         private readonly VoiceChatClient voiceChatClient;
         private readonly VoiceChatControlView voiceChatControlView;
         private readonly VoiceChatConfig voiceChatConfig;
 
         private readonly CompositeDisposable disposables = new CompositeDisposable();
+
+        private float time;
 
         public VoiceChatControlPresenter
         (
@@ -51,6 +54,24 @@ namespace Extreal.Integration.Chat.WebRTC.MVS.Controls.VoiceChatControl
                 .AddTo(disposables);
 
             voiceChatControlView.Initialize(voiceChatConfig.InitialMute);
+        }
+
+        public void Tick()
+        {
+            time += UnityEngine.Time.deltaTime;
+            if (time >= 0.25f)
+            {
+                time -= 0.25f;
+                var stringBuilder = new StringBuilder();
+                var localAudioLevel = voiceChatClient.LocalAudioLevel;
+                stringBuilder.Append($"local: {localAudioLevel:f2} dB{System.Environment.NewLine}");
+                var remoteAudioLevelList = voiceChatClient.RemoteAudioLevelList;
+                foreach (var id in remoteAudioLevelList.Keys)
+                {
+                    stringBuilder.Append($"{id[..8]}…: {remoteAudioLevelList[id]:f2} dB{System.Environment.NewLine}");
+                }
+                voiceChatControlView.SetAudioLevelsText(stringBuilder.ToString());
+            }
         }
 
         protected override void ReleaseManagedResources()

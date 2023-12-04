@@ -14,6 +14,7 @@ namespace Extreal.Integration.Chat.WebRTC.MVS.Controls.VoiceChatControl
         [SerializeField] private Slider micVolumeSlider;
         [SerializeField] private TMP_Text speakersVolumeText;
         [SerializeField] private Slider speakersVolumeSlider;
+        [SerializeField] private TMP_Text audioLevelsText;
 
         public IObservable<Unit> OnMuteButtonClicked
             => muteButton.OnClickAsObservable().TakeUntilDestroy(this);
@@ -44,5 +45,8 @@ namespace Extreal.Integration.Chat.WebRTC.MVS.Controls.VoiceChatControl
 
         public void SetSpeakersVolumeText(float volume)
             => speakersVolumeText.text = $"Speakers volume: {volume:f2}";
+
+        public void SetAudioLevelsText(string audioLevels)
+            => audioLevelsText.text = $"Audio level:{Environment.NewLine}{audioLevels}";
     }
 }
