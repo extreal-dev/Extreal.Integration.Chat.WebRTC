@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Extreal.Core.Common.System;
 using UniRx;
 
@@ -58,5 +59,17 @@ namespace Extreal.Integration.Chat.WebRTC
         /// Clears the status of this instance.
         /// </summary>
         public abstract void Clear();
+
+        /// <summary>
+        /// Returns own audio level.
+        /// </summary>
+        /// <value>local audio level (-80 dB ~ 0 dB)</value>
+        public abstract float LocalAudioLevel { get; }
+
+        /// <summary>
+        /// Returns other participants' audio levels.
+        /// </summary>
+        /// <value>other participants' id and audio levels (-80 dB ~ 0 dB) pair</value>
+        public abstract IReadOnlyDictionary<string, float> RemoteAudioLevelList { get; }
     }
 }

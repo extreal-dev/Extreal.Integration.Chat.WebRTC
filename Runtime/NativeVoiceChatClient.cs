@@ -27,6 +27,8 @@ namespace Extreal.Integration.Chat.WebRTC
         private bool mute;
         private float micVolume;
         private float speakersVolume;
+        private float[] samples = new float[2048];
+        private readonly Dictionary<string, float> remoteAudioLevelList = new Dictionary<string, float>();
 
         /// <summary>
         /// Creates NativeVoiceChatClient with peerClient and voiceChatConfig.
@@ -231,6 +233,45 @@ namespace Extreal.Integration.Chat.WebRTC
             resources.Keys.ToList().ForEach(ClosePc);
             resources.Clear();
             mute = voiceChatConfig.InitialMute;
+        }
+
+        /// <inheritdoc/>
+        public override float LocalAudioLevel
+        {
+            get
+            {
+                AudioSource inAudio;
+                if (resources.Count == 0 || (inAudio = resources.Values.First().inOutAudio.InAudio) == null)
+                {
+                    return -80f;
+                }
+                var dB = GetAudioLevelDB(inAudio);
+                return dB;
+            }
+        }
+
+        /// <inheritdoc/>
+        public override IReadOnlyDictionary<string, float> RemoteAudioLevelList
+        {
+            get
+            {
+                remoteAudioLevelList.Clear();
+                foreach (var id in resources.Keys)
+                {
+                    var outAudio = resources[id].inOutAudio.OutAudio;
+                    var dB = GetAudioLevelDB(outAudio);
+                    remoteAudioLevelList[id] = dB;
+                }
+                return remoteAudioLevelList;
+            }
+        }
+
+        private float GetAudioLevelDB(AudioSource audioSource, float referenceValue = 1f)
+        {
+            audioSource.GetOutputData(samples, 0);
+            var audioLevel = samples.Average(Mathf.Abs);
+            var dB = Mathf.Clamp(20 * Mathf.Log10(audioLevel / referenceValue), -80f, 0f);
+            return dB;
         }
 
         /// <inheritdoc/>

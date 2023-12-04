@@ -1,4 +1,5 @@
 ﻿#if UNITY_WEBGL
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using Extreal.Core.Logging;
@@ -61,6 +62,12 @@ namespace Extreal.Integration.Chat.WebRTC
 
         /// <inheritdoc/>
         public override void Clear() => WebGLHelper.CallAction(WithPrefix(nameof(Clear)));
+
+        /// <inheritdoc/>
+        public override float LocalAudioLevel => throw new System.NotImplementedException();
+
+        /// <inheritdoc/>
+        public override IReadOnlyDictionary<string, float> RemoteAudioLevelList => throw new System.NotImplementedException();
 
         private static string WithPrefix(string name) => $"{nameof(WebGLVoiceChatClient)}#{name}";
     }
