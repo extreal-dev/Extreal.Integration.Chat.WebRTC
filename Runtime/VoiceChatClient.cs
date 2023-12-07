@@ -47,13 +47,13 @@ namespace Extreal.Integration.Chat.WebRTC
         /// Sets microphone volume.
         /// </summary>
         /// <param name="volume">volume to set</param>
-        public abstract void SetMicVolume(float volume);
+        public abstract void SetInVolume(float volume);
 
         /// <summary>
         /// Sets speakers volume.
         /// </summary>
         /// <param name="volume">volume to set</param>
-        public abstract void SetSpeakersVolume(float volume);
+        public abstract void SetOutVolume(float volume);
 
         /// <summary>
         /// Clears the status of this instance.

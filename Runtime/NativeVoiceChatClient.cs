@@ -206,7 +206,7 @@ namespace Extreal.Integration.Chat.WebRTC
         }
 
         /// <inheritdoc/>
-        public override void SetMicVolume(float volume)
+        public override void SetInVolume(float volume)
         {
             micVolume = volume;
             resources.Values.ToList().ForEach(resource =>
@@ -217,7 +217,7 @@ namespace Extreal.Integration.Chat.WebRTC
         }
 
         /// <inheritdoc/>
-        public override void SetSpeakersVolume(float volume)
+        public override void SetOutVolume(float volume)
         {
             speakersVolume = volume;
             resources.Values.ToList().ForEach(resource =>

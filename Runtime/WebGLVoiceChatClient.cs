@@ -48,18 +48,18 @@ namespace Extreal.Integration.Chat.WebRTC
         }
 
         /// <inheritdoc/>
-        public override void SetMicVolume(float volume)
+        public override void SetInVolume(float volume)
         {
             if (!HasMicrophone())
             {
                 return;
             }
-            WebGLHelper.CallAction(WithPrefix(nameof(SetMicVolume)), volume.ToString());
+            WebGLHelper.CallAction(WithPrefix(nameof(SetInVolume)), volume.ToString());
         }
 
         /// <inheritdoc/>
-        public override void SetSpeakersVolume(float volume)
-            => WebGLHelper.CallAction(WithPrefix(nameof(SetSpeakersVolume)), volume.ToString());
+        public override void SetOutVolume(float volume)
+            => WebGLHelper.CallAction(WithPrefix(nameof(SetOutVolume)), volume.ToString());
 
         /// <inheritdoc/>
         public override void Clear() => WebGLHelper.CallAction(WithPrefix(nameof(Clear)));
