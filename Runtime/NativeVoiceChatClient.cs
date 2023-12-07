@@ -241,12 +241,12 @@ namespace Extreal.Integration.Chat.WebRTC
             get
             {
                 AudioSource inAudio;
-                if (resources.Count == 0 || (inAudio = resources.Values.First().inOutAudio.InAudio) == null)
+                if (resources.Count == 0 || mute || (inAudio = resources.Values.First().inOutAudio.InAudio) == null)
                 {
-                    return -80f;
+                    return -0f;
                 }
-                var dB = GetAudioLevelDB(inAudio);
-                return dB;
+                var audioLevel = GetAudioLevel(inAudio);
+                return audioLevel;
             }
         }
 
@@ -259,8 +259,8 @@ namespace Extreal.Integration.Chat.WebRTC
                 foreach (var id in resources.Keys)
                 {
                     var outAudio = resources[id].inOutAudio.OutAudio;
-                    var dB = GetAudioLevelDB(outAudio);
-                    remoteAudioLevelList[id] = dB;
+                    var audioLevel = GetAudioLevel(outAudio);
+                    remoteAudioLevelList[id] = audioLevel;
                 }
                 return remoteAudioLevelList;
             }
@@ -272,6 +272,13 @@ namespace Extreal.Integration.Chat.WebRTC
             var audioLevel = samples.Average(Mathf.Abs);
             var dB = Mathf.Clamp(20 * Mathf.Log10(audioLevel), -80f, 0f);
             return dB;
+        }
+
+        private float GetAudioLevel(AudioSource audioSource)
+        {
+            audioSource.GetOutputData(samples, 0);
+            var audioLevel = samples.Average(Mathf.Abs);
+            return audioLevel;
         }
 
         /// <inheritdoc/>

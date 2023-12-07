@@ -18,9 +18,14 @@ class VoiceChatClient {
     private outStreams: Map<string, MediaStream>;
 
     private inGainNodes: Map<string, GainNode>;
+    private outGainNodes: Map<string, GainNode>;
+
+    private inAnalyzerNodes: Map<string, AnalyserNode>;
+    private outAnalyzerNodes: Map<string, AnalyserNode>;
 
     private mute: boolean;
-    private micVolume: number;
+    private inVolume: number;
+    private outVolume: number;
 
     private audioContext: AudioContext;
 
@@ -28,7 +33,8 @@ class VoiceChatClient {
         this.isDebug = voiceChatConfig.isDebug;
         this.voiceChatConfig = voiceChatConfig;
         this.mute = voiceChatConfig.initialMute;
-        this.micVolume = 1.0;
+        this.inVolume = 1.0;
+        this.outVolume = 1.0;
         this.getPeerClient = getPeerClient;
         this.hasMicrophone = hasMicrophone;
         this.peerConnectionIds = new Set();
@@ -43,6 +49,9 @@ class VoiceChatClient {
         }
         this.audioContext = new AudioContext();
         this.inGainNodes = new Map<string, GainNode>();
+        this.outGainNodes = new Map<string, GainNode>();
+        this.inAnalyzerNodes = new Map<string, AnalyserNode>();
+        this.outAnalyzerNodes = new Map<string, AnalyserNode>();
     }
 
     private createPc = async (id: string, isOffer: boolean, pc: RTCPeerConnection) => {
@@ -61,12 +70,14 @@ class VoiceChatClient {
         if (this.hasMicrophone) {
             const micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-            const source = client.audioContext.createMediaStreamSource(micStream);
-            const gainNode = client.audioContext.createGain();
+            const sourceNode = client.audioContext.createMediaStreamSource(micStream);
+            const inGainNode = client.audioContext.createGain();
+            const inAnalyzerNode = client.audioContext.createAnalyser();
             const destinationNode = client.audioContext.createMediaStreamDestination();
             const inStream = destinationNode.stream;
-            source.connect(gainNode);
-            gainNode.connect(destinationNode);
+            sourceNode.connect(inGainNode);
+            inGainNode.connect(inAnalyzerNode);
+            inAnalyzerNode.connect(destinationNode);
 
             client.inStreams.set(id, inStream);
             const inTrack = inStream.getAudioTracks()[0];
@@ -74,8 +85,9 @@ class VoiceChatClient {
             pc.addTrack(inTrack, inStream);
             inTrack.enabled = !this.mute;
 
-            gainNode.gain.value = client.micVolume;
-            client.inGainNodes.set(id, gainNode);
+            inGainNode.gain.value = client.inVolume;
+            client.inGainNodes.set(id, inGainNode);
+            client.inAnalyzerNodes.set(id, inAnalyzerNode);
         }
 
         const outAudio = new Audio();
@@ -83,10 +95,18 @@ class VoiceChatClient {
 
         pc.addEventListener("track", async (event) => {
             const outStream = event.streams[0];
+            const sourceNode = client.audioContext.createMediaStreamSource(outStream);
+            const outGainNode = client.audioContext.createGain();
+            const outAnalyzerNode = client.audioContext.createAnalyser();
+
+            client.outGainNodes.set(id, outGainNode);
+            client.outAnalyzerNodes.set(id, outAnalyzerNode);
+
+            sourceNode.connect(outGainNode);
+            outGainNode.connect(outAnalyzerNode);
+            outAnalyzerNode.connect(client.audioContext.destination);
+
             outAudio.srcObject = outStream;
-            outAudio.loop = true;
-            await outAudio.play();
-            client.outStreams.set(id, outStream);
         });
     };
 
@@ -108,10 +128,33 @@ class VoiceChatClient {
             this.outStreams.delete(id);
         }
 
-        const gainNode = this.inGainNodes.get(id);
-        if (gainNode)
+        const inGainNode = this.inGainNodes.get(id);
+        if (inGainNode)
         {
             this.inGainNodes.delete(id);
+        }
+
+        const outGainNode = this.outGainNodes.get(id);
+        if (outGainNode)
+        {
+            this.outGainNodes.delete(id);
+        }
+
+        const inAnalyzerNode = this.inAnalyzerNodes.get(id);
+        if (inAnalyzerNode)
+        {
+            this.inAnalyzerNodes.delete(id);
+        }
+
+        const outAnalyzerNode = this.outAnalyzerNodes.get(id);
+        if (outAnalyzerNode)
+        {
+            this.outAnalyzerNodes.delete(id);
+        }
+
+        if (this.peerConnectionIds.has(id))
+        {
+            this.peerConnectionIds.delete(id);
         }
     };
 
@@ -121,6 +164,10 @@ class VoiceChatClient {
         this.inTracks.clear();
         this.outAudios.clear();
         this.outStreams.clear();
+        this.inGainNodes.clear();
+        this.outGainNodes.clear();
+        this.inAnalyzerNodes.clear();
+        this.outAnalyzerNodes.clear();
         this.mute = this.voiceChatConfig.initialMute;
     };
 
@@ -132,11 +179,50 @@ class VoiceChatClient {
         return this.mute;
     };
 
-    public setMicVolume = (volume: number) => {
-        this.micVolume = volume;
+    public setInVolume = (volume: number) => {
+        this.inVolume = volume;
         this.inGainNodes.forEach(gainNode => {
-            gainNode.gain.setValueAtTime(this.micVolume, this.audioContext.currentTime);
+            gainNode.gain.setValueAtTime(this.inVolume, this.audioContext.currentTime);
         })
+    }
+
+    public setOutVolume = (volume: number) => {
+        this.outVolume = volume;
+        this.outGainNodes.forEach(gainNode => {
+            gainNode.gain.setValueAtTime(this.outVolume, this.audioContext.currentTime);
+        })
+    }
+
+    public getLocalAudioLevel = () => {
+        if (this.inAnalyzerNodes.size == 0 || this.mute)
+        {
+            return 0;
+        }
+        const inAnalyzerNode = this.inAnalyzerNodes.values().next().value;
+        const audioLevel = this.getAudioLevel(inAnalyzerNode);
+        return audioLevel;
+    }
+
+    public getRemoteAudioLevelList = () => {
+        const remoteAudioLevelList = new Map<string, number>();
+        this.outAnalyzerNodes.forEach((outAnalyzerNode, id) => {
+            const audioLevel = this.getAudioLevel(outAnalyzerNode);
+            remoteAudioLevelList.set(id, audioLevel);
+        });
+        return remoteAudioLevelList;
+    }
+
+    private getAudioLevel = (analyserNode: AnalyserNode) => {
+        const samples = new Float32Array(analyserNode.fftSize);
+        analyserNode.getFloatTimeDomainData(samples);
+        const audioLevel = this.absAverage(samples);
+        return audioLevel;
+    }
+
+    private absAverage = (values: Float32Array) =>
+    {
+        const total = values.reduce((sum, current) => sum += Math.abs(current));
+        return total / values.length;
     }
 }
 

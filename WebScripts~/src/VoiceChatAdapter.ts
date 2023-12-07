@@ -27,6 +27,15 @@ class VoiceChatAdapter {
 
         addAction(this.withPrefix("SetMicVolume"), (volume: string) => this.getVoiceChatClient().setMicVolume(Number(volume)));
 
+        addAction(this.withPrefix("SetSpeakersVolume"), (volume: string) => this.getVoiceChatClient().setSpeakersVolume(Number(volume)));
+
+        addFunction(this.withPrefix("LocalAudioLevel"), () => this.getVoiceChatClient().getLocalAudioLevel().toString());
+
+        addFunction(this.withPrefix("RemoteAudioLevelList"), () => {
+            const remoteAudioLevelList = this.getVoiceChatClient().getRemoteAudioLevelList();
+            return JSON.stringify(Object.fromEntries(remoteAudioLevelList));
+        });
+
         addAction(this.withPrefix("Clear"), () => this.getVoiceChatClient().clear());
     };
 
