@@ -1,8 +1,10 @@
 ﻿#if !UNITY_WEBGL || UNITY_EDITOR
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Extreal.Core.Logging;
 using Extreal.Integration.P2P.WebRTC;
+using UniRx;
 using Unity.WebRTC;
 using UnityEngine;
 
@@ -28,7 +30,12 @@ namespace Extreal.Integration.Chat.WebRTC
         private float micVolume;
         private float speakersVolume;
         private float[] samples = new float[2048];
-        private readonly Dictionary<string, float> remoteAudioLevelList = new Dictionary<string, float>();
+
+        public override IObservable<List<AudioLevelChange>> OnAudioLevelChanged => onAudioLevelChanged;
+        private readonly Subject<List<AudioLevelChange>> onAudioLevelChanged = new Subject<List<AudioLevelChange>>();
+        private readonly Dictionary<string, float> audioLevelList = new Dictionary<string, float>();
+
+        private readonly CompositeDisposable disposables = new CompositeDisposable();
 
         /// <summary>
         /// Creates NativeVoiceChatClient with peerClient and voiceChatConfig.
@@ -39,7 +46,7 @@ namespace Extreal.Integration.Chat.WebRTC
             NativePeerClient peerClient, VoiceChatConfig voiceChatConfig)
         {
             voiceChatContainer = new GameObject("VoiceChatContainer").transform;
-            Object.DontDestroyOnLoad(voiceChatContainer);
+            UnityEngine.Object.DontDestroyOnLoad(voiceChatContainer);
 
             resources = new Dictionary<string, (
                 NativeInOutAudio inOutAudio, MediaStream inStream,
@@ -57,6 +64,10 @@ namespace Extreal.Integration.Chat.WebRTC
             {
                 Logger.LogDebug(HasMicrophone() ? "Microphone found" : "Microphone not found");
             }
+
+            Observable.EveryUpdate()
+                .Subscribe(_ => AudioLevelChangeHandler())
+                .AddTo(disposables);
         }
 
         private void CreatePc(string id, bool isOffer, RTCPeerConnection pc)
@@ -162,7 +173,7 @@ namespace Extreal.Integration.Chat.WebRTC
             }
             if (resource.inOutAudio.gameObject != null)
             {
-                Object.Destroy(resource.inOutAudio.gameObject);
+                UnityEngine.Object.Destroy(resource.inOutAudio.gameObject);
             }
 
             if (resource.inStream != null)
@@ -235,37 +246,6 @@ namespace Extreal.Integration.Chat.WebRTC
             mute = voiceChatConfig.InitialMute;
         }
 
-        /// <inheritdoc/>
-        public override float LocalAudioLevel
-        {
-            get
-            {
-                AudioSource inAudio;
-                if (resources.Count == 0 || mute || (inAudio = resources.Values.First().inOutAudio.InAudio) == null)
-                {
-                    return -0f;
-                }
-                var audioLevel = GetAudioLevel(inAudio);
-                return audioLevel;
-            }
-        }
-
-        /// <inheritdoc/>
-        public override IReadOnlyDictionary<string, float> RemoteAudioLevelList
-        {
-            get
-            {
-                remoteAudioLevelList.Clear();
-                foreach (var id in resources.Keys)
-                {
-                    var outAudio = resources[id].inOutAudio.OutAudio;
-                    var audioLevel = GetAudioLevel(outAudio);
-                    remoteAudioLevelList[id] = audioLevel;
-                }
-                return remoteAudioLevelList;
-            }
-        }
-
         private float GetAudioLevelDB(AudioSource audioSource)
         {
             audioSource.GetOutputData(samples, 0);
@@ -281,11 +261,67 @@ namespace Extreal.Integration.Chat.WebRTC
             return audioLevel;
         }
 
+        private void AudioLevelChangeHandler()
+        {
+            var changedList = new List<AudioLevelChange>();
+            var localId = "Local";
+            if (resources.Count > 0)
+            {
+                var inAudio = resources.First().Value.inOutAudio.InAudio;
+                var audioLevel = GetAudioLevel(inAudio);
+                if (!audioLevelList.ContainsKey(localId))
+                {
+                    changedList.Add(new AudioLevelChange(localId, AudioLevelChangeState.New, audioLevel));
+                    audioLevelList[localId] = audioLevel;
+                }
+                else if (audioLevelList[localId] != audioLevel)
+                {
+                    changedList.Add(new AudioLevelChange(localId, AudioLevelChangeState.Change, audioLevel));
+                    audioLevelList[localId] = audioLevel;
+                }
+            }
+            foreach (var id in resources.Keys)
+            {
+                var outAudio = resources[id].inOutAudio.OutAudio;
+                var audioLevel = GetAudioLevel(outAudio);
+                if (!audioLevelList.ContainsKey(id))
+                {
+                    changedList.Add(new AudioLevelChange(id, AudioLevelChangeState.New, audioLevel));
+                    audioLevelList[id] = audioLevel;
+                }
+                else if (audioLevel != audioLevelList[id])
+                {
+                    changedList.Add(new AudioLevelChange(id, AudioLevelChangeState.Change, audioLevel));
+                    audioLevelList[id] = audioLevel;
+                }
+            }
+
+            var removedIds = new HashSet<string>(audioLevelList.Keys);
+            var currentIds = new HashSet<string>(resources.Keys);
+            if (resources.Count > 0)
+            {
+                currentIds.Add(localId);
+            }
+            removedIds.ExceptWith(new HashSet<string>(currentIds));
+
+            foreach (var removedId in removedIds)
+            {
+                changedList.Add(new AudioLevelChange(removedId, AudioLevelChangeState.Leave, 0f));
+                audioLevelList.Remove(removedId);
+            }
+
+            if (changedList.Count > 0)
+            {
+                onAudioLevelChanged.OnNext(changedList);
+            }
+        }
+
         /// <inheritdoc/>
         protected override void ReleaseManagedResources()
         {
             Microphone.End(null);
-            Object.Destroy(voiceChatContainer);
+            UnityEngine.Object.Destroy(voiceChatContainer);
+            disposables.Dispose();
             base.ReleaseManagedResources();
         }
     }

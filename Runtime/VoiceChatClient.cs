@@ -61,15 +61,9 @@ namespace Extreal.Integration.Chat.WebRTC
         public abstract void Clear();
 
         /// <summary>
-        /// Returns own audio level.
+        /// <para>Invokes update timing if audio levels are changed.</para>
+        /// Arg: Id and audio level (0.0~1.0) pairs that audio level changed
         /// </summary>
-        /// <value>local audio level (-80 dB ~ 0 dB)</value>
-        public abstract float LocalAudioLevel { get; }
-
-        /// <summary>
-        /// Returns other participants' audio levels.
-        /// </summary>
-        /// <value>other participants' id and audio levels (-80 dB ~ 0 dB) pair</value>
-        public abstract IReadOnlyDictionary<string, float> RemoteAudioLevelList { get; }
+        public abstract IObservable<List<AudioLevelChange>> OnAudioLevelChanged { get; }
     }
 }

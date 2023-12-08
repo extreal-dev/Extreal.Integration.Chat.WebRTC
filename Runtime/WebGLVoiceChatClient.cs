@@ -1,4 +1,5 @@
 ﻿#if UNITY_WEBGL
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
@@ -64,26 +65,7 @@ namespace Extreal.Integration.Chat.WebRTC
         /// <inheritdoc/>
         public override void Clear() => WebGLHelper.CallAction(WithPrefix(nameof(Clear)));
 
-        /// <inheritdoc/>
-        public override float LocalAudioLevel
-        {
-            get
-            {
-                var localAudioLevel = WebGLHelper.CallFunction(WithPrefix(nameof(LocalAudioLevel)));
-                return float.Parse(localAudioLevel);
-            }
-        }
-
-        /// <inheritdoc/>
-        public override IReadOnlyDictionary<string, float> RemoteAudioLevelList
-        {
-            get
-            {
-                var remoteAudioLevelListStr = WebGLHelper.CallFunction(WithPrefix(nameof(RemoteAudioLevelList)));
-                var remoteAudioLevelList = JsonSerializer.Deserialize<Dictionary<string, float>>(remoteAudioLevelListStr);
-                return remoteAudioLevelList;
-            }
-        }
+        public override IObservable<List<AudioLevelChange>> OnAudioLevelChanged { get; } = new UniRx.Subject<List<AudioLevelChange>>();
 
         private static string WithPrefix(string name) => $"{nameof(WebGLVoiceChatClient)}#{name}";
     }
