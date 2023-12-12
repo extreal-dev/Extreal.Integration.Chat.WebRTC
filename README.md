@@ -41,6 +41,9 @@
   - Clients can leave the group (client exit)
   - Ability to send text (text chat)
   - Ability to talk (voice chat)
+    - Ability to adjust microphone volume
+    - Ability to adjust other people's volume
+    - Ability to obtain own and others' voice volume
   - Ability to return to the group selection screen (host stop)
 
 ### Client
@@ -50,4 +53,7 @@
 - Virtual space
   - Ability to send text (text chat)
   - Ability to talk (voice chat)
+    - Ability to adjust microphone volume
+    - Ability to adjust other people's volume
+    - Ability to obtain own and others' voice volume
   - Ability to return to the group selection screen while moving the player (leave host)
