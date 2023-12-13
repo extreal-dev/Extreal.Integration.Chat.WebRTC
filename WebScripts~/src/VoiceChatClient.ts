@@ -5,6 +5,10 @@ type VoiceChatConfig = {
     isDebug: boolean;
 };
 
+type VoiceChatClientCallBacks = {
+    onAudioLevelChanged: (audioLevels: Map<string, number>) => void;
+};
+
 class VoiceChatClient {
     private readonly isDebug: boolean;
     private readonly voiceChatConfig: VoiceChatConfig;
@@ -29,9 +33,15 @@ class VoiceChatClient {
 
     private audioContext: AudioContext;
 
-    constructor(voiceChatConfig: VoiceChatConfig, getPeerClient: PeerClientProvider, hasMicrophone: boolean) {
+    private audioLevelList: Map<string, number>;
+    private previousAudioLevelList: Map<string, number>;
+
+    private readonly callBacks: VoiceChatClientCallBacks;
+
+    constructor(voiceChatConfig: VoiceChatConfig, getPeerClient: PeerClientProvider, hasMicrophone: boolean, callBacks: VoiceChatClientCallBacks) {
         this.isDebug = voiceChatConfig.isDebug;
         this.voiceChatConfig = voiceChatConfig;
+        this.callBacks = callBacks;
         this.mute = voiceChatConfig.initialMute;
         this.inVolume = 1.0;
         this.outVolume = 1.0;
@@ -52,6 +62,8 @@ class VoiceChatClient {
         this.outGainNodes = new Map<string, GainNode>();
         this.inAnalyzerNodes = new Map<string, AnalyserNode>();
         this.outAnalyzerNodes = new Map<string, AnalyserNode>();
+        this.audioLevelList = new Map<string, number>();
+        this.previousAudioLevelList = new Map<string, number>();
     }
 
     private createPc = async (id: string, isOffer: boolean, pc: RTCPeerConnection) => {
@@ -129,31 +141,26 @@ class VoiceChatClient {
         }
 
         const inGainNode = this.inGainNodes.get(id);
-        if (inGainNode)
-        {
+        if (inGainNode) {
             this.inGainNodes.delete(id);
         }
 
         const outGainNode = this.outGainNodes.get(id);
-        if (outGainNode)
-        {
+        if (outGainNode) {
             this.outGainNodes.delete(id);
         }
 
         const inAnalyzerNode = this.inAnalyzerNodes.get(id);
-        if (inAnalyzerNode)
-        {
+        if (inAnalyzerNode) {
             this.inAnalyzerNodes.delete(id);
         }
 
         const outAnalyzerNode = this.outAnalyzerNodes.get(id);
-        if (outAnalyzerNode)
-        {
+        if (outAnalyzerNode) {
             this.outAnalyzerNodes.delete(id);
         }
 
-        if (this.peerConnectionIds.has(id))
-        {
+        if (this.peerConnectionIds.has(id)) {
             this.peerConnectionIds.delete(id);
         }
     };
@@ -174,7 +181,7 @@ class VoiceChatClient {
     public toggleMute = () => {
         this.mute = !this.mute;
         [...this.inTracks.values()].forEach((track) => {
-          track.enabled = !this.mute;
+            track.enabled = !this.mute;
         });
         return this.mute;
     };
@@ -194,8 +201,7 @@ class VoiceChatClient {
     }
 
     public getLocalAudioLevel = () => {
-        if (this.inAnalyzerNodes.size == 0 || this.mute)
-        {
+        if (this.inAnalyzerNodes.size == 0 || this.mute) {
             return 0;
         }
         const inAnalyzerNode = this.inAnalyzerNodes.values().next().value;
@@ -212,6 +218,47 @@ class VoiceChatClient {
         return remoteAudioLevelList;
     }
 
+    public handleAudioLevels = () => {
+        const localId = this.getPeerClient().getSocketId();
+        if (localId) {
+            this.previousAudioLevelList.clear();
+            this.audioLevelList.forEach((level, id) => {
+                this.previousAudioLevelList.set(id, level);
+            });
+            this.audioLevelList.clear();
+
+            if (this.inAnalyzerNodes.size > 0) {
+                let audioLevel;
+                if (this.mute) {
+                    audioLevel = 0;
+                }
+                else {
+                    const inAnalyzerNode = this.inAnalyzerNodes.values().next().value;
+                    audioLevel = this.getAudioLevel(inAnalyzerNode);
+                }
+                this.audioLevelList.set(localId, audioLevel);
+
+                this.outAnalyzerNodes.forEach((outAnalyzerNode, id) => {
+                    audioLevel = this.getAudioLevel(outAnalyzerNode);
+                    this.audioLevelList.set(id, audioLevel);
+                });
+            }
+
+            this.previousAudioLevelList.forEach((level, id) => {
+                if (!this.audioLevelList.has(id) || this.audioLevelList.get(id) != level) {
+                    this.callBacks.onAudioLevelChanged(this.audioLevelList);
+                    return;
+                }
+            });
+            this.audioLevelList.forEach((_, id) => {
+                if (!this.previousAudioLevelList.has(id)) {
+                    this.callBacks.onAudioLevelChanged(this.audioLevelList);
+                    return;
+                }
+            });
+        }
+    }
+
     private getAudioLevel = (analyserNode: AnalyserNode) => {
         const samples = new Float32Array(analyserNode.fftSize);
         analyserNode.getFloatTimeDomainData(samples);
@@ -219,8 +266,7 @@ class VoiceChatClient {
         return audioLevel;
     }
 
-    private absAverage = (values: Float32Array) =>
-    {
+    private absAverage = (values: Float32Array) => {
         const total = values.reduce((sum, current) => sum += Math.abs(current));
         return total / values.length;
     }

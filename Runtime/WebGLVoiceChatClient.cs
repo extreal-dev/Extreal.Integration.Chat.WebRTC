@@ -3,8 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
+using AOT;
 using Extreal.Core.Logging;
 using Extreal.Integration.Web.Common;
+using UniRx;
 
 namespace Extreal.Integration.Chat.WebRTC
 {
@@ -15,12 +17,20 @@ namespace Extreal.Integration.Chat.WebRTC
     {
         private static readonly ELogger Logger = LoggingManager.GetLogger(nameof(WebGLVoiceChatClient));
 
+        private static WebGLVoiceChatClient instance;
+
+        public override IObservable<IReadOnlyDictionary<string, float>> OnAudioLevelChanged => onAudioLevelChanged;
+        private readonly Subject<IReadOnlyDictionary<string, float>> onAudioLevelChanged = new Subject<IReadOnlyDictionary<string, float>>();
+
+        private readonly CompositeDisposable disposables = new CompositeDisposable();
+
         /// <summary>
         /// Creates WebGLVoiceChatClient with voiceChatConfig.
         /// </summary>
         /// <param name="voiceChatConfig">Voice chat config.</param>
         public WebGLVoiceChatClient(VoiceChatConfig voiceChatConfig)
         {
+            instance = this;
             var config = new WebGLVoiceChatConfig
             {
                 initialMute = voiceChatConfig.InitialMute,
@@ -28,6 +38,13 @@ namespace Extreal.Integration.Chat.WebRTC
             };
             var jsonVoiceJsonChatConfig = JsonSerializer.Serialize(config);
             WebGLHelper.CallAction(WithPrefix(nameof(WebGLVoiceChatClient)), jsonVoiceJsonChatConfig);
+            WebGLHelper.AddCallback(WithPrefix(nameof(HandleOnAudioLevelChanged)), HandleOnAudioLevelChanged);
+
+            Observable.EveryUpdate()
+                .Subscribe(_ => AudioLevelChangeHandler())
+                .AddTo(disposables);
+
+            onAudioLevelChanged.AddTo(disposables);
         }
 
         public override bool HasMicrophone()
@@ -65,9 +82,22 @@ namespace Extreal.Integration.Chat.WebRTC
         /// <inheritdoc/>
         public override void Clear() => WebGLHelper.CallAction(WithPrefix(nameof(Clear)));
 
-        public override IObservable<List<AudioLevelChange>> OnAudioLevelChanged { get; } = new UniRx.Subject<List<AudioLevelChange>>();
-
         private static string WithPrefix(string name) => $"{nameof(WebGLVoiceChatClient)}#{name}";
+
+        private void AudioLevelChangeHandler() => WebGLHelper.CallAction(WithPrefix(nameof(AudioLevelChangeHandler)));
+
+        [MonoPInvokeCallback(typeof(Action<string, string>))]
+        private static void HandleOnAudioLevelChanged(string audioLevelsListStr, string unused)
+        {
+            var audioLevelList = JsonSerializer.Deserialize<Dictionary<string, float>>(audioLevelsListStr);
+            instance.onAudioLevelChanged.OnNext(audioLevelList);
+        }
+
+        protected override void ReleaseManagedResources()
+        {
+            disposables.Dispose();
+            base.ReleaseManagedResources();
+        }
     }
 
     /// <summary>

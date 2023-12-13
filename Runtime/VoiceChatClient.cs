@@ -62,8 +62,8 @@ namespace Extreal.Integration.Chat.WebRTC
 
         /// <summary>
         /// <para>Invokes update timing if audio levels are changed.</para>
-        /// Arg: Id and audio level (0.0~1.0) pairs that audio level changed
+        /// Arg: Dictionary whose key is ID and value is audio level (contains unchanged values)
         /// </summary>
-        public abstract IObservable<List<AudioLevelChange>> OnAudioLevelChanged { get; }
+        public abstract IObservable<IReadOnlyDictionary<string, float>> OnAudioLevelChanged { get; }
     }
 }

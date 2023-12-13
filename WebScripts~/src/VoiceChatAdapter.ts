@@ -1,5 +1,5 @@
 import { PeerClientProvider } from "@extreal-dev/extreal.integration.p2p.webrtc";
-import { addAction, addFunction } from "@extreal-dev/extreal.integration.web.common";
+import { addAction, addFunction, callback } from "@extreal-dev/extreal.integration.web.common";
 import { VoiceChatClient } from "./VoiceChatClient";
 
 let hasMicrophone = false;
@@ -18,7 +18,9 @@ class VoiceChatAdapter {
 
     public adapt = (getPeerClient: PeerClientProvider) => {
         addAction(this.withPrefix("WebGLVoiceChatClient"), (jsonConfig) => {
-            this.voiceChatClient = new VoiceChatClient(JSON.parse(jsonConfig), getPeerClient, hasMicrophone);
+            this.voiceChatClient = new VoiceChatClient(JSON.parse(jsonConfig), getPeerClient, hasMicrophone, {
+                onAudioLevelChanged: (audioLevels) => callback(this.withPrefix("HandleOnAudioLevelChanged"), JSON.stringify(Object.fromEntries(audioLevels))),
+            });
         });
 
         addFunction(this.withPrefix("HasMicrophone"), () => hasMicrophone.toString());
@@ -35,6 +37,8 @@ class VoiceChatAdapter {
             const remoteAudioLevelList = this.getVoiceChatClient().getRemoteAudioLevelList();
             return JSON.stringify(Object.fromEntries(remoteAudioLevelList));
         });
+
+        addAction(this.withPrefix("AudioLevelChangeHandler"), () => this.getVoiceChatClient().handleAudioLevels());
 
         addAction(this.withPrefix("Clear"), () => this.getVoiceChatClient().clear());
     };

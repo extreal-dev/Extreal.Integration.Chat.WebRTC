@@ -17,6 +17,7 @@ namespace Extreal.Integration.Chat.WebRTC
     {
         private static readonly ELogger Logger = LoggingManager.GetLogger(nameof(NativeVoiceChatClient));
 
+        private readonly PeerClient peerClient;
         private readonly VoiceChatConfig voiceChatConfig;
         private readonly Dictionary<string, (
             NativeInOutAudio inOutAudio, MediaStream inStream,
@@ -31,9 +32,12 @@ namespace Extreal.Integration.Chat.WebRTC
         private float speakersVolume;
         private float[] samples = new float[2048];
 
-        public override IObservable<List<AudioLevelChange>> OnAudioLevelChanged => onAudioLevelChanged;
-        private readonly Subject<List<AudioLevelChange>> onAudioLevelChanged = new Subject<List<AudioLevelChange>>();
+        public override IObservable<IReadOnlyDictionary<string, float>> OnAudioLevelChanged => onAudioLevelChanged;
+        private readonly Subject<IReadOnlyDictionary<string, float>> onAudioLevelChanged = new Subject<IReadOnlyDictionary<string, float>>();
         private readonly Dictionary<string, float> audioLevelList = new Dictionary<string, float>();
+        private readonly Dictionary<string, float> previousAudioLevelList = new Dictionary<string, float>();
+
+        private string ownId;
 
         private readonly CompositeDisposable disposables = new CompositeDisposable();
 
@@ -51,6 +55,7 @@ namespace Extreal.Integration.Chat.WebRTC
             resources = new Dictionary<string, (
                 NativeInOutAudio inOutAudio, MediaStream inStream,
                 AudioStreamTrack inTrack, MediaStream outStream)>();
+            this.peerClient = peerClient;
             this.voiceChatConfig = voiceChatConfig;
             mute = voiceChatConfig.InitialMute;
             peerClient.AddPcCreateHook(CreatePc);
@@ -65,9 +70,19 @@ namespace Extreal.Integration.Chat.WebRTC
                 Logger.LogDebug(HasMicrophone() ? "Microphone found" : "Microphone not found");
             }
 
+            peerClient.OnStarted
+                .Subscribe(id => ownId = id)
+                .AddTo(disposables);
+
+            peerClient.OnDisconnected
+                .Subscribe(_ => ownId = null)
+                .AddTo(disposables);
+
             Observable.EveryUpdate()
                 .Subscribe(_ => AudioLevelChangeHandler())
                 .AddTo(disposables);
+
+            onAudioLevelChanged.AddTo(disposables);
         }
 
         private void CreatePc(string id, bool isOffer, RTCPeerConnection pc)
@@ -263,56 +278,45 @@ namespace Extreal.Integration.Chat.WebRTC
 
         private void AudioLevelChangeHandler()
         {
-            var changedList = new List<AudioLevelChange>();
-            var localId = "Local";
-            if (resources.Count > 0)
+            if (!string.IsNullOrEmpty(ownId))
             {
-                var inAudio = resources.First().Value.inOutAudio.InAudio;
-                var audioLevel = GetAudioLevel(inAudio);
-                if (!audioLevelList.ContainsKey(localId))
+                previousAudioLevelList.Clear();
+                foreach (var id in audioLevelList.Keys)
                 {
-                    changedList.Add(new AudioLevelChange(localId, AudioLevelChangeState.New, audioLevel));
-                    audioLevelList[localId] = audioLevel;
+                    previousAudioLevelList[id] = audioLevelList[id];
                 }
-                else if (audioLevelList[localId] != audioLevel)
-                {
-                    changedList.Add(new AudioLevelChange(localId, AudioLevelChangeState.Change, audioLevel));
-                    audioLevelList[localId] = audioLevel;
-                }
-            }
-            foreach (var id in resources.Keys)
-            {
-                var outAudio = resources[id].inOutAudio.OutAudio;
-                var audioLevel = GetAudioLevel(outAudio);
-                if (!audioLevelList.ContainsKey(id))
-                {
-                    changedList.Add(new AudioLevelChange(id, AudioLevelChangeState.New, audioLevel));
-                    audioLevelList[id] = audioLevel;
-                }
-                else if (audioLevel != audioLevelList[id])
-                {
-                    changedList.Add(new AudioLevelChange(id, AudioLevelChangeState.Change, audioLevel));
-                    audioLevelList[id] = audioLevel;
-                }
-            }
+                audioLevelList.Clear();
 
-            var removedIds = new HashSet<string>(audioLevelList.Keys);
-            var currentIds = new HashSet<string>(resources.Keys);
-            if (resources.Count > 0)
-            {
-                currentIds.Add(localId);
-            }
-            removedIds.ExceptWith(new HashSet<string>(currentIds));
+                if (resources.Count > 0)
+                {
+                    var inAudio = resources.First().Value.inOutAudio.InAudio;
+                    var audioLevel = GetAudioLevel(inAudio);
+                    audioLevelList[ownId] = audioLevel;
 
-            foreach (var removedId in removedIds)
-            {
-                changedList.Add(new AudioLevelChange(removedId, AudioLevelChangeState.Leave, 0f));
-                audioLevelList.Remove(removedId);
-            }
+                    foreach (var id in resources.Keys)
+                    {
+                        var outAudio = resources[id].inOutAudio.OutAudio;
+                        audioLevel = GetAudioLevel(outAudio);
+                        audioLevelList[id] = audioLevel;
+                    }
+                }
 
-            if (changedList.Count > 0)
-            {
-                onAudioLevelChanged.OnNext(changedList);
+                foreach (var id in previousAudioLevelList.Keys)
+                {
+                    if (!audioLevelList.ContainsKey(id) || audioLevelList[id] != previousAudioLevelList[id])
+                    {
+                        onAudioLevelChanged.OnNext(audioLevelList);
+                        return;
+                    }
+                }
+                foreach (var id in audioLevelList.Keys)
+                {
+                    if (!previousAudioLevelList.ContainsKey(id))
+                    {
+                        onAudioLevelChanged.OnNext(audioLevelList);
+                        return;
+                    }
+                }
             }
         }
 
