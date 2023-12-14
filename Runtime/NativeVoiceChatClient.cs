@@ -261,14 +261,6 @@ namespace Extreal.Integration.Chat.WebRTC
             mute = voiceChatConfig.InitialMute;
         }
 
-        private float GetAudioLevelDB(AudioSource audioSource)
-        {
-            audioSource.GetOutputData(samples, 0);
-            var audioLevel = samples.Average(Mathf.Abs);
-            var dB = Mathf.Clamp(20 * Mathf.Log10(audioLevel), -80f, 0f);
-            return dB;
-        }
-
         private float GetAudioLevel(AudioSource audioSource)
         {
             audioSource.GetOutputData(samples, 0);
