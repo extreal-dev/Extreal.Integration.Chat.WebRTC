@@ -55,6 +55,8 @@ namespace Extreal.Integration.Chat.WebRTC
             this.peerClient = peerClient;
             this.voiceChatConfig = voiceChatConfig;
             mute = voiceChatConfig.InitialMute;
+            inVolume = voiceChatConfig.InitialInVolume;
+            outVolume = voiceChatConfig.InitialOutVolume;
             peerClient.AddPcCreateHook(CreatePc);
             peerClient.AddPcCloseHook(ClosePc);
 

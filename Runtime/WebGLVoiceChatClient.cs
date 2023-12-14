@@ -31,6 +31,8 @@ namespace Extreal.Integration.Chat.WebRTC
             var config = new WebGLVoiceChatConfig
             {
                 initialMute = voiceChatConfig.InitialMute,
+                initialInVolume = voiceChatConfig.InitialInVolume,
+                initialOutVolume = voiceChatConfig.InitialOutVolume,
                 isDebug = Logger.IsDebug()
             };
             var jsonVoiceChatConfig = JsonSerializer.Serialize(config);
@@ -102,6 +104,8 @@ namespace Extreal.Integration.Chat.WebRTC
     public class WebGLVoiceChatConfig
     {
         public bool initialMute { get; set; }
+        public float initialInVolume { get; set; }
+        public float initialOutVolume { get; set; }
         public bool isDebug { get; set; }
     }
 }

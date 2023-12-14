@@ -2,6 +2,8 @@ import { PeerClientProvider } from "@extreal-dev/extreal.integration.p2p.webrtc"
 
 type VoiceChatConfig = {
     initialMute: boolean;
+    initialInVolume: number;
+    initialOutVolume: number;
     isDebug: boolean;
 };
 
@@ -43,8 +45,8 @@ class VoiceChatClient {
         this.voiceChatConfig = voiceChatConfig;
         this.callBacks = callBacks;
         this.mute = voiceChatConfig.initialMute;
-        this.inVolume = 1.0;
-        this.outVolume = 1.0;
+        this.inVolume = voiceChatConfig.initialInVolume;
+        this.outVolume = voiceChatConfig.initialOutVolume;
         this.getPeerClient = getPeerClient;
         this.hasMicrophone = hasMicrophone;
         this.peerConnectionIds = new Set();
