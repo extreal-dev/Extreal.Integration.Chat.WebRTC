@@ -23,6 +23,13 @@ namespace Extreal.Integration.Chat.WebRTC
         public IObservable<bool> OnMuted => onMuted.AddTo(Disposables);
         private readonly Subject<bool> onMuted = new Subject<bool>();
 
+        /// <summary>
+        /// <para>Invokes update timing if audio levels are changed.</para>
+        /// Arg: Dictionary whose key is ID and value is audio level (contains unchanged values)
+        /// </summary>
+        public IObservable<IReadOnlyDictionary<string, float>> OnAudioLevelChanged => onAudioLevelChanged.AddTo(Disposables);
+        private readonly Subject<IReadOnlyDictionary<string, float>> onAudioLevelChanged = new Subject<IReadOnlyDictionary<string, float>>();
+
         /// <inheritdoc/>
         protected override void ReleaseManagedResources() => Disposables.Dispose();
 
@@ -31,6 +38,12 @@ namespace Extreal.Integration.Chat.WebRTC
         /// </summary>
         /// <param name="muted">True if muted, false otherwise</param>
         protected void FireOnMuted(bool muted) => onMuted.OnNext(muted);
+
+        /// <summary>
+        /// Publishes that the audio levels are changed.
+        /// </summary>
+        /// <param name="audioLevelList">ID and audio level pairs (contains unchanged values)</param>
+        protected void FireOnAudioLevelChanged(IReadOnlyDictionary<string, float> audioLevelList) => onAudioLevelChanged.OnNext(audioLevelList);
 
         /// <summary>
         /// Returns whether or not a microphone is available.
@@ -44,26 +57,20 @@ namespace Extreal.Integration.Chat.WebRTC
         public abstract void ToggleMute();
 
         /// <summary>
-        /// Sets microphone volume.
+        /// Sets input volume.
         /// </summary>
-        /// <param name="volume">volume to set</param>
+        /// <param name="volume">volume to set (0.0 - 1.0)</param>
         public abstract void SetInVolume(float volume);
 
         /// <summary>
-        /// Sets speakers volume.
+        /// Sets output volume.
         /// </summary>
-        /// <param name="volume">volume to set</param>
+        /// <param name="volume">volume to set (0.0 - 1.0)</param>
         public abstract void SetOutVolume(float volume);
 
         /// <summary>
         /// Clears the status of this instance.
         /// </summary>
         public abstract void Clear();
-
-        /// <summary>
-        /// <para>Invokes update timing if audio levels are changed.</para>
-        /// Arg: Dictionary whose key is ID and value is audio level (contains unchanged values)
-        /// </summary>
-        public abstract IObservable<IReadOnlyDictionary<string, float>> OnAudioLevelChanged { get; }
     }
 }

@@ -19,9 +19,6 @@ namespace Extreal.Integration.Chat.WebRTC
 
         private static WebGLVoiceChatClient instance;
 
-        public override IObservable<IReadOnlyDictionary<string, float>> OnAudioLevelChanged => onAudioLevelChanged;
-        private readonly Subject<IReadOnlyDictionary<string, float>> onAudioLevelChanged = new Subject<IReadOnlyDictionary<string, float>>();
-
         private readonly CompositeDisposable disposables = new CompositeDisposable();
 
         /// <summary>
@@ -36,15 +33,13 @@ namespace Extreal.Integration.Chat.WebRTC
                 initialMute = voiceChatConfig.InitialMute,
                 isDebug = Logger.IsDebug()
             };
-            var jsonVoiceJsonChatConfig = JsonSerializer.Serialize(config);
-            WebGLHelper.CallAction(WithPrefix(nameof(WebGLVoiceChatClient)), jsonVoiceJsonChatConfig);
+            var jsonVoiceChatConfig = JsonSerializer.Serialize(config);
+            WebGLHelper.CallAction(WithPrefix(nameof(WebGLVoiceChatClient)), jsonVoiceChatConfig);
             WebGLHelper.AddCallback(WithPrefix(nameof(HandleOnAudioLevelChanged)), HandleOnAudioLevelChanged);
 
             Observable.EveryUpdate()
                 .Subscribe(_ => AudioLevelChangeHandler())
                 .AddTo(disposables);
-
-            onAudioLevelChanged.AddTo(disposables);
         }
 
         public override bool HasMicrophone()
@@ -90,7 +85,7 @@ namespace Extreal.Integration.Chat.WebRTC
         private static void HandleOnAudioLevelChanged(string audioLevelsListStr, string unused)
         {
             var audioLevelList = JsonSerializer.Deserialize<Dictionary<string, float>>(audioLevelsListStr);
-            instance.onAudioLevelChanged.OnNext(audioLevelList);
+            instance.FireOnAudioLevelChanged(audioLevelList);
         }
 
         protected override void ReleaseManagedResources()

@@ -187,14 +187,14 @@ class VoiceChatClient {
     };
 
     public setInVolume = (volume: number) => {
-        this.inVolume = volume;
+        this.inVolume = this.clamp(volume, 0, 1);
         this.inGainNodes.forEach(gainNode => {
             gainNode.gain.setValueAtTime(this.inVolume, this.audioContext.currentTime);
         })
     }
 
     public setOutVolume = (volume: number) => {
-        this.outVolume = volume;
+        this.outVolume = this.clamp(volume, 0, 1);
         this.outGainNodes.forEach(gainNode => {
             gainNode.gain.setValueAtTime(this.outVolume, this.audioContext.currentTime);
         })
@@ -270,6 +270,8 @@ class VoiceChatClient {
         const total = values.reduce((sum, current) => sum += Math.abs(current));
         return total / values.length;
     }
+
+    private clamp = (value: number, min: number, max: number) => Math.max(Math.min(value, max), min);
 }
 
 export { VoiceChatClient };

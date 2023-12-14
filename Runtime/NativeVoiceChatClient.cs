@@ -1,5 +1,4 @@
 ﻿#if !UNITY_WEBGL || UNITY_EDITOR
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Extreal.Core.Logging;
@@ -28,12 +27,10 @@ namespace Extreal.Integration.Chat.WebRTC
         private readonly AudioClip mic;
 
         private bool mute;
-        private float micVolume;
-        private float speakersVolume;
+        private float inVolume;
+        private float outVolume;
         private float[] samples = new float[2048];
 
-        public override IObservable<IReadOnlyDictionary<string, float>> OnAudioLevelChanged => onAudioLevelChanged;
-        private readonly Subject<IReadOnlyDictionary<string, float>> onAudioLevelChanged = new Subject<IReadOnlyDictionary<string, float>>();
         private readonly Dictionary<string, float> audioLevelList = new Dictionary<string, float>();
         private readonly Dictionary<string, float> previousAudioLevelList = new Dictionary<string, float>();
 
@@ -50,7 +47,7 @@ namespace Extreal.Integration.Chat.WebRTC
             NativePeerClient peerClient, VoiceChatConfig voiceChatConfig)
         {
             voiceChatContainer = new GameObject("VoiceChatContainer").transform;
-            UnityEngine.Object.DontDestroyOnLoad(voiceChatContainer);
+            Object.DontDestroyOnLoad(voiceChatContainer);
 
             resources = new Dictionary<string, (
                 NativeInOutAudio inOutAudio, MediaStream inStream,
@@ -81,8 +78,6 @@ namespace Extreal.Integration.Chat.WebRTC
             Observable.EveryUpdate()
                 .Subscribe(_ => AudioLevelChangeHandler())
                 .AddTo(disposables);
-
-            onAudioLevelChanged.AddTo(disposables);
         }
 
         private void CreatePc(string id, bool isOffer, RTCPeerConnection pc)
@@ -95,7 +90,7 @@ namespace Extreal.Integration.Chat.WebRTC
 
             var inOutAudio = GetInOutAudio();
 
-            inOutAudio.InAudio.volume = micVolume;
+            inOutAudio.InAudio.volume = inVolume;
 
             MediaStream inStream = null;
             AudioStreamTrack inTrack = null;
@@ -188,7 +183,7 @@ namespace Extreal.Integration.Chat.WebRTC
             }
             if (resource.inOutAudio.gameObject != null)
             {
-                UnityEngine.Object.Destroy(resource.inOutAudio.gameObject);
+                Object.Destroy(resource.inOutAudio.gameObject);
             }
 
             if (resource.inStream != null)
@@ -234,22 +229,22 @@ namespace Extreal.Integration.Chat.WebRTC
         /// <inheritdoc/>
         public override void SetInVolume(float volume)
         {
-            micVolume = volume;
+            inVolume = Mathf.Clamp(volume, 0f, 1f);
             resources.Values.ToList().ForEach(resource =>
             {
                 var inAudio = resource.inOutAudio.InAudio;
-                inAudio.volume = micVolume;
+                inAudio.volume = inVolume;
             });
         }
 
         /// <inheritdoc/>
         public override void SetOutVolume(float volume)
         {
-            speakersVolume = volume;
+            outVolume = Mathf.Clamp(volume, 0f, 1f);
             resources.Values.ToList().ForEach(resource =>
             {
                 var outAudio = resource.inOutAudio.OutAudio;
-                outAudio.volume = speakersVolume;
+                outAudio.volume = outVolume;
             });
         }
 
@@ -297,7 +292,7 @@ namespace Extreal.Integration.Chat.WebRTC
                 {
                     if (!audioLevelList.ContainsKey(id) || audioLevelList[id] != previousAudioLevelList[id])
                     {
-                        onAudioLevelChanged.OnNext(audioLevelList);
+                        FireOnAudioLevelChanged(audioLevelList);
                         return;
                     }
                 }
@@ -305,7 +300,7 @@ namespace Extreal.Integration.Chat.WebRTC
                 {
                     if (!previousAudioLevelList.ContainsKey(id))
                     {
-                        onAudioLevelChanged.OnNext(audioLevelList);
+                        FireOnAudioLevelChanged(audioLevelList);
                         return;
                     }
                 }
@@ -316,7 +311,7 @@ namespace Extreal.Integration.Chat.WebRTC
         protected override void ReleaseManagedResources()
         {
             Microphone.End(null);
-            UnityEngine.Object.Destroy(voiceChatContainer);
+            Object.Destroy(voiceChatContainer);
             disposables.Dispose();
             base.ReleaseManagedResources();
         }
