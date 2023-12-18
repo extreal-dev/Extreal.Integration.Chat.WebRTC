@@ -33,7 +33,7 @@ class VoiceChatClient {
     private inVolume: number;
     private outVolume: number;
 
-    private audioContext: AudioContext;
+    private audioContext: AudioContext | undefined;
 
     private audioLevelList: Map<string, number>;
     private previousAudioLevelList: Map<string, number>;
@@ -59,13 +59,26 @@ class VoiceChatClient {
         if (this.isDebug) {
             console.log(hasMicrophone ? "Microphone found" : "Microphone not found");
         }
-        this.audioContext = new AudioContext();
         this.inGainNodes = new Map<string, GainNode>();
         this.outGainNodes = new Map<string, GainNode>();
         this.inAnalyzerNodes = new Map<string, AnalyserNode>();
         this.outAnalyzerNodes = new Map<string, AnalyserNode>();
         this.audioLevelList = new Map<string, number>();
         this.previousAudioLevelList = new Map<string, number>();
+
+        const audioContextResumeFunc = () => {
+            if (this.audioContext === undefined)
+            {
+                this.audioContext = new AudioContext();
+            }
+            this.audioContext.resume();
+            document.getElementById("unity-canvas")?.removeEventListener("touchstart", audioContextResumeFunc);
+            document.getElementById("unity-canvas")?.removeEventListener("mousedown", audioContextResumeFunc);
+            document.getElementById("unity-canvas")?.removeEventListener("keydown", audioContextResumeFunc);
+        };
+        document.getElementById("unity-canvas")?.addEventListener("touchstart", audioContextResumeFunc);
+        document.getElementById("unity-canvas")?.addEventListener("mousedown", audioContextResumeFunc);
+        document.getElementById("unity-canvas")?.addEventListener("keydown", audioContextResumeFunc);
     }
 
     private createPc = async (id: string, isOffer: boolean, pc: RTCPeerConnection) => {
@@ -80,6 +93,10 @@ class VoiceChatClient {
         this.peerConnectionIds.add(id);
 
         const client = this;
+        if (!client.audioContext)
+        {
+            client.audioContext = new AudioContext();
+        }
 
         if (this.hasMicrophone) {
             const micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -108,6 +125,10 @@ class VoiceChatClient {
         client.outAudios.set(id, outAudio);
 
         pc.addEventListener("track", async (event) => {
+            if (!client.audioContext)
+            {
+                client.audioContext = new AudioContext();
+            }
             const outStream = event.streams[0];
             const sourceNode = client.audioContext.createMediaStreamSource(outStream);
             const outGainNode = client.audioContext.createGain();
@@ -191,6 +212,10 @@ class VoiceChatClient {
     public setInVolume = (volume: number) => {
         this.inVolume = this.clamp(volume, 0, 1);
         this.inGainNodes.forEach(gainNode => {
+            if (!this.audioContext)
+            {
+                this.audioContext = new AudioContext();
+            }
             gainNode.gain.setValueAtTime(this.inVolume, this.audioContext.currentTime);
         })
     }
@@ -198,6 +223,10 @@ class VoiceChatClient {
     public setOutVolume = (volume: number) => {
         this.outVolume = this.clamp(volume, 0, 1);
         this.outGainNodes.forEach(gainNode => {
+            if (!this.audioContext)
+            {
+                this.audioContext = new AudioContext();
+            }
             gainNode.gain.setValueAtTime(this.outVolume, this.audioContext.currentTime);
         })
     }
