@@ -231,24 +231,6 @@ class VoiceChatClient {
         })
     }
 
-    public getLocalAudioLevel = () => {
-        if (this.inAnalyzerNodes.size == 0 || this.mute) {
-            return 0;
-        }
-        const inAnalyzerNode = this.inAnalyzerNodes.values().next().value;
-        const audioLevel = this.getAudioLevel(inAnalyzerNode);
-        return audioLevel;
-    }
-
-    public getRemoteAudioLevelList = () => {
-        const remoteAudioLevelList = new Map<string, number>();
-        this.outAnalyzerNodes.forEach((outAnalyzerNode, id) => {
-            const audioLevel = this.getAudioLevel(outAnalyzerNode);
-            remoteAudioLevelList.set(id, audioLevel);
-        });
-        return remoteAudioLevelList;
-    }
-
     public handleAudioLevels = () => {
         const localId = this.getPeerClient().getSocketId();
         if (localId) {
