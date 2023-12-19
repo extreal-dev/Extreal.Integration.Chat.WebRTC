@@ -250,7 +250,9 @@ class VoiceChatClient {
                     audioLevel = this.getAudioLevel(inAnalyzerNode);
                 }
                 this.audioLevelList.set(localId, audioLevel);
-
+            }
+            if (this.outAnalyzerNodes.size > 0) {
+                let audioLevel;
                 this.outAnalyzerNodes.forEach((outAnalyzerNode, id) => {
                     audioLevel = this.getAudioLevel(outAnalyzerNode);
                     this.audioLevelList.set(id, audioLevel);
