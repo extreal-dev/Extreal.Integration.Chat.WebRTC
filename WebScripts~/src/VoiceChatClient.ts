@@ -124,7 +124,7 @@ class VoiceChatClient {
         const outAudio = new Audio();
         client.outAudios.set(id, outAudio);
 
-        pc.addEventListener("track", async (event) => {
+        pc.addEventListener("track", (event) => {
             if (!client.audioContext)
             {
                 client.audioContext = new AudioContext();
