@@ -1,5 +1,6 @@
 ﻿#if !UNITY_WEBGL || UNITY_EDITOR
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Extreal.Core.Logging;
 using Extreal.Integration.P2P.WebRTC;
@@ -36,6 +37,7 @@ namespace Extreal.Integration.Chat.WebRTC
 
         private string ownId;
 
+        [SuppressMessage("Usage", "CC0033")]
         private readonly CompositeDisposable disposables = new CompositeDisposable();
 
         /// <summary>

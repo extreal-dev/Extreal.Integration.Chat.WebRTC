@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Extreal.Core.Common.System;
 using UniRx;
@@ -12,9 +12,8 @@ namespace Extreal.Integration.Chat.WebRTC.MVS.Controls.VoiceChatControl
         private readonly VoiceChatControlView voiceChatControlView;
         private readonly VoiceChatConfig voiceChatConfig;
 
+        [SuppressMessage("Usage", "CC0033")]
         private readonly CompositeDisposable disposables = new CompositeDisposable();
-
-        private float time;
 
         public VoiceChatControlPresenter
         (

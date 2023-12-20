@@ -19,6 +19,7 @@ namespace Extreal.Integration.Chat.WebRTC
 
         private static WebGLVoiceChatClient instance;
 
+        [SuppressMessage("Usage", "CC0033")]
         private readonly CompositeDisposable disposables = new CompositeDisposable();
 
         /// <summary>
@@ -81,7 +82,7 @@ namespace Extreal.Integration.Chat.WebRTC
 
         private static string WithPrefix(string name) => $"{nameof(WebGLVoiceChatClient)}#{name}";
 
-        private void AudioLevelChangeHandler() => WebGLHelper.CallAction(WithPrefix(nameof(AudioLevelChangeHandler)));
+        private static void AudioLevelChangeHandler() => WebGLHelper.CallAction(WithPrefix(nameof(AudioLevelChangeHandler)));
 
         [MonoPInvokeCallback(typeof(Action<string, string>))]
         private static void HandleOnAudioLevelChanged(string audioLevelsListStr, string unused)
@@ -100,7 +101,7 @@ namespace Extreal.Integration.Chat.WebRTC
     /// <summary>
     /// Class that holds config for WebGL voice chat.
     /// </summary>
-    [SuppressMessage("Usage", "IDE1006")]
+    [SuppressMessage("Usage", "IDE1006"), SuppressMessage("Usage", "CC0047")]
     public class WebGLVoiceChatConfig
     {
         public bool initialMute { get; set; }

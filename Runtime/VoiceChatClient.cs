@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Extreal.Core.Common.System;
 using UniRx;
 
@@ -21,6 +22,7 @@ namespace Extreal.Integration.Chat.WebRTC
         /// Arg: True if muted, false otherwise
         /// </summary>
         public IObservable<bool> OnMuted => onMuted.AddTo(Disposables);
+        [SuppressMessage("Usage", "CC0033")]
         private readonly Subject<bool> onMuted = new Subject<bool>();
 
         /// <summary>
@@ -28,6 +30,7 @@ namespace Extreal.Integration.Chat.WebRTC
         /// Arg: Dictionary whose key is ID and value is audio level (contains unchanged values)
         /// </summary>
         public IObservable<IReadOnlyDictionary<string, float>> OnAudioLevelChanged => onAudioLevelChanged.AddTo(Disposables);
+        [SuppressMessage("Usage", "CC0033")]
         private readonly Subject<IReadOnlyDictionary<string, float>> onAudioLevelChanged = new Subject<IReadOnlyDictionary<string, float>>();
 
         /// <inheritdoc/>
