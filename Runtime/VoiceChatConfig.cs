@@ -29,6 +29,8 @@ namespace Extreal.Integration.Chat.WebRTC
         /// Creates VoiceChatConfig with initialMute.
         /// </summary>
         /// <param name="initialMute">True if initial muted, false otherwise.</param>
+        /// <param name="initialInVolume">Initial input volume (0.0 - 1.0)</param>
+        /// <param name="initialOutVolume">Initial output volume (0.0 - 1.0)</param>
         [SuppressMessage("Style", "CC0057")]
         public VoiceChatConfig(bool initialMute = true, float initialInVolume = 1f, float initialOutVolume = 1f)
         {

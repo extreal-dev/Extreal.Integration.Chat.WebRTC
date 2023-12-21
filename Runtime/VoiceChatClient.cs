@@ -26,7 +26,7 @@ namespace Extreal.Integration.Chat.WebRTC
         private readonly Subject<bool> onMuted = new Subject<bool>();
 
         /// <summary>
-        /// <para>Invokes update timing if audio levels are changed.</para>
+        /// <para>Invokes at the time of Update immediately after the audio level has been changed.</para>
         /// Arg: Dictionary whose key is ID and value is audio level (contains unchanged values)
         /// </summary>
         public IObservable<IReadOnlyDictionary<string, float>> OnAudioLevelChanged => onAudioLevelChanged.AddTo(Disposables);
@@ -49,7 +49,7 @@ namespace Extreal.Integration.Chat.WebRTC
         protected void FireOnAudioLevelChanged(IReadOnlyDictionary<string, float> audioLevelList) => onAudioLevelChanged.OnNext(audioLevelList);
 
         /// <summary>
-        /// Returns whether or not a microphone is available.
+        /// Returns whether a microphone is available or not.
         /// </summary>
         /// <returns>True if it is available, false otherwise</returns>
         public abstract bool HasMicrophone();
@@ -62,13 +62,13 @@ namespace Extreal.Integration.Chat.WebRTC
         /// <summary>
         /// Sets input volume.
         /// </summary>
-        /// <param name="volume">volume to set (0.0 - 1.0)</param>
+        /// <param name="volume">volume to be set (0.0 - 1.0)</param>
         public abstract void SetInVolume(float volume);
 
         /// <summary>
         /// Sets output volume.
         /// </summary>
-        /// <param name="volume">volume to set (0.0 - 1.0)</param>
+        /// <param name="volume">volume to be set (0.0 - 1.0)</param>
         public abstract void SetOutVolume(float volume);
 
         /// <summary>
