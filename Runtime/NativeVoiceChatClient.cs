@@ -271,44 +271,46 @@ namespace Extreal.Integration.Chat.WebRTC
 
         private void AudioLevelChangeHandler()
         {
-            if (!string.IsNullOrEmpty(ownId))
+            if (string.IsNullOrEmpty(ownId))
             {
-                previousAudioLevelList.Clear();
-                foreach (var id in audioLevelList.Keys)
-                {
-                    previousAudioLevelList[id] = audioLevelList[id];
-                }
-                audioLevelList.Clear();
+                return;
+            }
 
-                if (resources.Count > 0)
-                {
-                    var inAudio = resources.First().Value.inOutAudio.InAudio;
-                    var audioLevel = GetAudioLevel(inAudio);
-                    audioLevelList[ownId] = audioLevel;
+            previousAudioLevelList.Clear();
+            foreach (var id in audioLevelList.Keys)
+            {
+                previousAudioLevelList[id] = audioLevelList[id];
+            }
+            audioLevelList.Clear();
 
-                    foreach (var id in resources.Keys)
-                    {
-                        var outAudio = resources[id].inOutAudio.OutAudio;
-                        audioLevel = GetAudioLevel(outAudio);
-                        audioLevelList[id] = audioLevel;
-                    }
-                }
+            if (resources.Count > 0)
+            {
+                var inAudio = resources.First().Value.inOutAudio.InAudio;
+                var audioLevel = GetAudioLevel(inAudio);
+                audioLevelList[ownId] = audioLevel;
 
-                foreach (var id in previousAudioLevelList.Keys)
+                foreach (var id in resources.Keys)
                 {
-                    if (!audioLevelList.ContainsKey(id) || audioLevelList[id] != previousAudioLevelList[id])
-                    {
-                        FireOnAudioLevelChanged(audioLevelList);
-                        return;
-                    }
+                    var outAudio = resources[id].inOutAudio.OutAudio;
+                    audioLevel = GetAudioLevel(outAudio);
+                    audioLevelList[id] = audioLevel;
                 }
-                foreach (var id in audioLevelList.Keys)
+            }
+
+            foreach (var id in previousAudioLevelList.Keys)
+            {
+                if (!audioLevelList.ContainsKey(id) || audioLevelList[id] != previousAudioLevelList[id])
                 {
-                    if (!previousAudioLevelList.ContainsKey(id))
-                    {
-                        FireOnAudioLevelChanged(audioLevelList);
-                        return;
-                    }
+                    FireOnAudioLevelChanged(audioLevelList);
+                    return;
+                }
+            }
+            foreach (var id in audioLevelList.Keys)
+            {
+                if (!previousAudioLevelList.ContainsKey(id))
+                {
+                    FireOnAudioLevelChanged(audioLevelList);
+                    return;
                 }
             }
         }

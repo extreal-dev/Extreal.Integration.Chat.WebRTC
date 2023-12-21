@@ -235,45 +235,47 @@ class VoiceChatClient {
 
     public handleAudioLevels = () => {
         const localId = this.getPeerClient().getSocketId();
-        if (localId) {
-            this.previousAudioLevelList.clear();
-            this.audioLevelList.forEach((level, id) => {
-                this.previousAudioLevelList.set(id, level);
-            });
-            this.audioLevelList.clear();
+        if (!localId) {
+            return
+        }
 
-            if (this.inAnalyzerNodes.size > 0) {
-                let audioLevel;
-                if (this.mute) {
-                    audioLevel = 0;
-                }
-                else {
-                    const inAnalyzerNode = this.inAnalyzerNodes.values().next().value;
-                    audioLevel = this.getAudioLevel(inAnalyzerNode);
-                }
-                this.audioLevelList.set(localId, audioLevel);
-            }
-            if (this.outAnalyzerNodes.size > 0) {
-                let audioLevel;
-                this.outAnalyzerNodes.forEach((outAnalyzerNode, id) => {
-                    audioLevel = this.getAudioLevel(outAnalyzerNode);
-                    this.audioLevelList.set(id, audioLevel);
-                });
-            }
+        this.previousAudioLevelList.clear();
+        this.audioLevelList.forEach((level, id) => {
+            this.previousAudioLevelList.set(id, level);
+        });
+        this.audioLevelList.clear();
 
-            this.previousAudioLevelList.forEach((level, id) => {
-                if (!this.audioLevelList.has(id) || this.audioLevelList.get(id) != level) {
-                    this.callBacks.onAudioLevelChanged(this.audioLevelList);
-                    return;
-                }
-            });
-            this.audioLevelList.forEach((_, id) => {
-                if (!this.previousAudioLevelList.has(id)) {
-                    this.callBacks.onAudioLevelChanged(this.audioLevelList);
-                    return;
-                }
+        if (this.inAnalyzerNodes.size > 0) {
+            let audioLevel;
+            if (this.mute) {
+                audioLevel = 0;
+            }
+            else {
+                const inAnalyzerNode = this.inAnalyzerNodes.values().next().value;
+                audioLevel = this.getAudioLevel(inAnalyzerNode);
+            }
+            this.audioLevelList.set(localId, audioLevel);
+        }
+        if (this.outAnalyzerNodes.size > 0) {
+            let audioLevel;
+            this.outAnalyzerNodes.forEach((outAnalyzerNode, id) => {
+                audioLevel = this.getAudioLevel(outAnalyzerNode);
+                this.audioLevelList.set(id, audioLevel);
             });
         }
+
+        this.previousAudioLevelList.forEach((level, id) => {
+            if (!this.audioLevelList.has(id) || this.audioLevelList.get(id) != level) {
+                this.callBacks.onAudioLevelChanged(this.audioLevelList);
+                return;
+            }
+        });
+        this.audioLevelList.forEach((_, id) => {
+            if (!this.previousAudioLevelList.has(id)) {
+                this.callBacks.onAudioLevelChanged(this.audioLevelList);
+                return;
+            }
+        });
     }
 
     private getAudioLevel = (analyserNode: AnalyserNode) => {
