@@ -258,6 +258,8 @@ namespace Extreal.Integration.Chat.WebRTC
             resources.Keys.ToList().ForEach(ClosePc);
             resources.Clear();
             mute = voiceChatConfig.InitialMute;
+            inVolume = voiceChatConfig.InitialInVolume;
+            outVolume = voiceChatConfig.InitialOutVolume;
         }
 
         private float GetAudioLevel(AudioSource audioSource)

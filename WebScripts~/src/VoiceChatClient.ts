@@ -199,6 +199,8 @@ class VoiceChatClient {
         this.inAnalyzerNodes.clear();
         this.outAnalyzerNodes.clear();
         this.mute = this.voiceChatConfig.initialMute;
+        this.inVolume = this.voiceChatConfig.initialInVolume;
+        this.inVolume = this.voiceChatConfig.initialOutVolume;
     };
 
     public toggleMute = () => {
