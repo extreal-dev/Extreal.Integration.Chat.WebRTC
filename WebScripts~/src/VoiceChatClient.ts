@@ -246,23 +246,21 @@ class VoiceChatClient {
         this.audioLevelList.clear();
 
         if (this.inAnalyzerNodes.size > 0) {
-            let audioLevel;
+            let inAudioLevel;
             if (this.mute) {
-                audioLevel = 0;
+                inAudioLevel = 0;
             }
             else {
                 const inAnalyzerNode = this.inAnalyzerNodes.values().next().value;
-                audioLevel = this.getAudioLevel(inAnalyzerNode);
+                inAudioLevel = this.getAudioLevel(inAnalyzerNode);
             }
-            this.audioLevelList.set(localId, audioLevel);
+            this.audioLevelList.set(localId, inAudioLevel);
         }
-        if (this.outAnalyzerNodes.size > 0) {
-            let audioLevel;
-            this.outAnalyzerNodes.forEach((outAnalyzerNode, id) => {
-                audioLevel = this.getAudioLevel(outAnalyzerNode);
-                this.audioLevelList.set(id, audioLevel);
-            });
-        }
+        let outAudioLevel;
+        this.outAnalyzerNodes.forEach((outAnalyzerNode, id) => {
+            outAudioLevel = this.getAudioLevel(outAnalyzerNode);
+            this.audioLevelList.set(id, outAudioLevel);
+        });
 
         this.previousAudioLevelList.forEach((level, id) => {
             if (!this.audioLevelList.has(id) || this.audioLevelList.get(id) != level) {

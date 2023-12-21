@@ -283,18 +283,17 @@ namespace Extreal.Integration.Chat.WebRTC
             }
             audioLevelList.Clear();
 
-            if (resources.Count > 0)
+            var inAudio = resources.Values.Select(resource => resource.inOutAudio.InAudio).FirstOrDefault();
+            if (inAudio != null)
             {
-                var inAudio = resources.First().Value.inOutAudio.InAudio;
-                var audioLevel = GetAudioLevel(inAudio);
-                audioLevelList[ownId] = audioLevel;
-
-                foreach (var id in resources.Keys)
-                {
-                    var outAudio = resources[id].inOutAudio.OutAudio;
-                    audioLevel = GetAudioLevel(outAudio);
-                    audioLevelList[id] = audioLevel;
-                }
+                var inAudioLevel = mute ? 0f : GetAudioLevel(inAudio);
+                audioLevelList[ownId] = inAudioLevel;
+            }
+            foreach (var id in resources.Keys)
+            {
+                var outAudio = resources[id].inOutAudio.OutAudio;
+                var outAudioLevel = GetAudioLevel(outAudio);
+                audioLevelList[id] = outAudioLevel;
             }
 
             foreach (var id in previousAudioLevelList.Keys)
