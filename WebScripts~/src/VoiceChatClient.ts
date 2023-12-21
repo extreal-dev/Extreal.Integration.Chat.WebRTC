@@ -67,7 +67,7 @@ class VoiceChatClient {
         this.previousAudioLevelList = new Map<string, number>();
 
         const audioContextResumeFunc = () => {
-            if (this.audioContext === undefined)
+            if (!this.audioContext)
             {
                 this.audioContext = new AudioContext();
             }
