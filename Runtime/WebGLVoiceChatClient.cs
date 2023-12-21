@@ -85,9 +85,9 @@ namespace Extreal.Integration.Chat.WebRTC
         private static void AudioLevelChangeHandler() => WebGLHelper.CallAction(WithPrefix(nameof(AudioLevelChangeHandler)));
 
         [MonoPInvokeCallback(typeof(Action<string, string>))]
-        private static void HandleOnAudioLevelChanged(string audioLevelsListStr, string unused)
+        private static void HandleOnAudioLevelChanged(string audioLevelListStr, string unused)
         {
-            var audioLevelList = JsonSerializer.Deserialize<Dictionary<string, float>>(audioLevelsListStr);
+            var audioLevelList = JsonSerializer.Deserialize<Dictionary<string, float>>(audioLevelListStr);
             instance.FireOnAudioLevelChanged(audioLevelList);
         }
 
