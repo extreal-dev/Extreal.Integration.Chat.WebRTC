@@ -10,10 +10,10 @@
     "@extreal-dev/extreal.integration.web.common" "^1.0.0"
     socket.io-client "^4.7.1"
 
-"@extreal-dev/extreal.integration.web.common@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@extreal-dev/extreal.integration.web.common/-/extreal.integration.web.common-1.0.0.tgz#3113ecaf48e44cf6712d18fc6b40991b4cd82d3a"
-  integrity sha512-aH5A5ClpaKVUFE1DbvYVy4L7J81wo+oQmBJJmc6geR5CQTa7942CUYW11jnPp5hCq1QXG+jz/yVpU26p00I+Qw==
+"@extreal-dev/extreal.integration.web.common@^1.0.0", "@extreal-dev/extreal.integration.web.common@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@extreal-dev/extreal.integration.web.common/-/extreal.integration.web.common-1.0.1.tgz#4f7fc604587b021102200c13c21ff261281fcc17"
+  integrity sha512-Qs52RRt7uH0DeW1f4SG4k7QcbaSeQNkQF2jr/0NRwXaxeM+L/rbj8XDIpwUtYjFmbMLfs9BJ4yAoJ4sPQUOMcg==
 
 "@jridgewell/gen-mapping@^0.3.0":
   version "0.3.3"
