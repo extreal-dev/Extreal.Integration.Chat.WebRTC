@@ -24,7 +24,6 @@ namespace Extreal.Integration.Chat.WebRTC
         /// <value>Initial output volume (0.0 - 1.0)</value>
         public float InitialOutVolume { get; }
 
-
         /// <summary>
         /// Creates VoiceChatConfig with initialMute.
         /// </summary>
