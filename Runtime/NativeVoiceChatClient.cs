@@ -218,7 +218,6 @@ namespace Extreal.Integration.Chat.WebRTC
         {
             if (!HasMicrophone())
             {
-                // Not covered by testing due to defensive implementation
                 return;
             }
 
