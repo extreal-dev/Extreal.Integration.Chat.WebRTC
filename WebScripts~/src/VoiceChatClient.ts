@@ -12,25 +12,25 @@ type VoiceChatClientCallBacks = {
     onAudioLevelChanged: (audioLevels: Map<string, number>) => void;
 };
 
+class Resource {
+    inStream: MediaStream | undefined;
+    inTrack: MediaStreamTrack | undefined;
+    inTransceiver: RTCRtpTransceiver | undefined;
+    outAudio: HTMLAudioElement | undefined;
+    outStream: MediaStream | undefined;
+    inGainNode: GainNode | undefined;
+    outGainNode: GainNode | undefined;
+    inAnalyzerNode: AnalyserNode | undefined;
+    outAnalyzerNode: AnalyserNode | undefined;
+}
+
 class VoiceChatClient {
     private readonly isDebug: boolean;
     private readonly voiceChatConfig: VoiceChatConfig;
     private readonly getPeerClient: PeerClientProvider;
     private readonly hasMicrophone: boolean;
 
-    private peerConnectionIds: Set<string>;
-    private inStreams: Map<string, MediaStream>;
-    private inTracks: Map<string, MediaStreamTrack>;
-    private inTransceivers: Map<string, RTCRtpTransceiver>;
-    private outAudios: Map<string, HTMLAudioElement>;
-    private outStreams: Map<string, MediaStream>;
-
-    private inGainNodes: Map<string, GainNode>;
-    private outGainNodes: Map<string, GainNode>;
-
-    private inAnalyzerNodes: Map<string, AnalyserNode>;
-    private outAnalyzerNodes: Map<string, AnalyserNode>;
-
+    private resources: Map<string, Resource>;
     private mute: boolean;
     private inVolume: number;
     private outVolume: number;
@@ -53,21 +53,12 @@ class VoiceChatClient {
         this.audioLevelCheckIntervalSeconds = voiceChatConfig.initialAudioLevelCheckIntervalSeconds;
         this.getPeerClient = getPeerClient;
         this.hasMicrophone = hasMicrophone;
-        this.peerConnectionIds = new Set();
-        this.inStreams = new Map();
-        this.inTracks = new Map();
-        this.inTransceivers = new Map();
-        this.outAudios = new Map();
-        this.outStreams = new Map();
+        this.resources = new Map();
         this.getPeerClient().addPcCreateHook(this.createPc);
         this.getPeerClient().addPcCloseHook(this.closePc);
         if (this.isDebug) {
             console.log(hasMicrophone ? "Microphone found" : "Microphone not found");
         }
-        this.inGainNodes = new Map<string, GainNode>();
-        this.outGainNodes = new Map<string, GainNode>();
-        this.inAnalyzerNodes = new Map<string, AnalyserNode>();
-        this.outAnalyzerNodes = new Map<string, AnalyserNode>();
         this.audioLevelList = new Map<string, number>();
         this.previousAudioLevelList = new Map<string, number>();
 
@@ -89,7 +80,7 @@ class VoiceChatClient {
     }
 
     private createPc = async (id: string, isOffer: boolean, pc: RTCPeerConnection) => {
-        if (this.peerConnectionIds.has(id)) {
+        if (this.resources.has(id)) {
             return;
         }
 
@@ -97,14 +88,13 @@ class VoiceChatClient {
             console.log(`New MediaStream: id=${id}`);
         }
 
-        this.peerConnectionIds.add(id);
-
         const client = this;
         if (!client.audioContext)
         {
             client.audioContext = new AudioContext();
         }
 
+        const resource: Resource = new Resource();
         if (this.hasMicrophone) {
             const micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
@@ -117,22 +107,23 @@ class VoiceChatClient {
             inGainNode.connect(inAnalyzerNode);
             inAnalyzerNode.connect(destinationNode);
 
-            client.inStreams.set(id, inStream);
             const inTrack = inStream.getAudioTracks()[0];
-            client.inTracks.set(id, inTrack);
             pc.addTrack(inTrack, inStream);
             inTrack.enabled = !this.mute;
 
             inGainNode.gain.value = client.inVolume;
-            client.inGainNodes.set(id, inGainNode);
-            client.inAnalyzerNodes.set(id, inAnalyzerNode);
+
+            resource.inStream = inStream;
+            resource.inTrack = inTrack;
+            resource.inGainNode = inGainNode;
+            resource.inAnalyzerNode = inAnalyzerNode;
         }
         else {
-            this.inTransceivers.set(id, pc.addTransceiver("audio", { direction: "recvonly" }));
+            resource.inTransceiver = pc.addTransceiver("audio", { direction: "recvonly" });
         }
 
         const outAudio = new Audio();
-        client.outAudios.set(id, outAudio);
+        resource.outAudio = outAudio;
 
         pc.addEventListener("track", (event) => {
             if (!client.audioContext)
@@ -143,76 +134,43 @@ class VoiceChatClient {
             const sourceNode = client.audioContext.createMediaStreamSource(outStream);
             const outGainNode = client.audioContext.createGain();
             const outAnalyzerNode = client.audioContext.createAnalyser();
-
-            client.outGainNodes.set(id, outGainNode);
-            client.outAnalyzerNodes.set(id, outAnalyzerNode);
-
+            
             sourceNode.connect(outGainNode);
             outGainNode.connect(outAnalyzerNode);
             outAnalyzerNode.connect(client.audioContext.destination);
-
+            
             outAudio.srcObject = outStream;
+
+            resource.outGainNode = outGainNode;
+            resource.outAnalyzerNode = outAnalyzerNode;
         });
+
+        this.resources.set(id, resource);
     };
 
     private closePc = (id: string) => {
-        const inStream = this.inStreams.get(id);
-        if (inStream) {
-            inStream.getTracks().forEach((track) => track.stop());
-            this.inStreams.delete(id);
+        const resource = this.resources.get(id);
+        if (!resource) {
+            return;
         }
-        this.inTracks.delete(id);
-        const outAudio = this.outAudios.get(id);
-        if (outAudio) {
-            outAudio.pause();
-            this.outAudios.delete(id);
+        if (resource.inStream) {
+            resource.inStream.getTracks().forEach((track) => track.stop());
         }
-        const inTransceivers = this.inTransceivers.get(id);
-        if (inTransceivers) {
-            inTransceivers.stop();
-            this.inTransceivers.delete(id);
+        if (resource.inTransceiver) {
+            resource.inTransceiver.stop();
         }
-        const outStream = this.outStreams.get(id);
-        if (outStream) {
-            outStream.getTracks().forEach((track) => track.stop());
-            this.outStreams.delete(id);
+        if (resource.outAudio) {
+            resource.outAudio.pause();
+            resource.outAudio.remove();
         }
-
-        const inGainNode = this.inGainNodes.get(id);
-        if (inGainNode) {
-            this.inGainNodes.delete(id);
-        }
-
-        const outGainNode = this.outGainNodes.get(id);
-        if (outGainNode) {
-            this.outGainNodes.delete(id);
-        }
-
-        const inAnalyzerNode = this.inAnalyzerNodes.get(id);
-        if (inAnalyzerNode) {
-            this.inAnalyzerNodes.delete(id);
-        }
-
-        const outAnalyzerNode = this.outAnalyzerNodes.get(id);
-        if (outAnalyzerNode) {
-            this.outAnalyzerNodes.delete(id);
-        }
-
-        if (this.peerConnectionIds.has(id)) {
-            this.peerConnectionIds.delete(id);
+        if (resource.outStream) {
+            resource.outStream.getTracks().forEach((track) => track.stop());
         }
     };
 
     public clear = () => {
-        [...this.outAudios.keys()].forEach(this.closePc);
-        this.inStreams.clear();
-        this.inTracks.clear();
-        this.outAudios.clear();
-        this.outStreams.clear();
-        this.inGainNodes.clear();
-        this.outGainNodes.clear();
-        this.inAnalyzerNodes.clear();
-        this.outAnalyzerNodes.clear();
+        [...this.resources.keys()].forEach(this.closePc);
+        this.resources.clear();
         this.mute = this.voiceChatConfig.initialMute;
         this.inVolume = this.voiceChatConfig.initialInVolume;
         this.inVolume = this.voiceChatConfig.initialOutVolume;
@@ -220,31 +178,37 @@ class VoiceChatClient {
 
     public toggleMute = () => {
         this.mute = !this.mute;
-        [...this.inTracks.values()].forEach((track) => {
-            track.enabled = !this.mute;
+        this.resources.forEach((resource) => {
+            if (resource.inTrack) {
+                resource.inTrack.enabled = !this.mute;
+            }
         });
         return this.mute;
     };
 
     public setInVolume = (volume: number) => {
         this.inVolume = this.clamp(volume, 0, 1);
-        this.inGainNodes.forEach(gainNode => {
+        this.resources.forEach(resource => {
             if (!this.audioContext)
             {
                 this.audioContext = new AudioContext();
             }
-            gainNode.gain.setValueAtTime(this.inVolume, this.audioContext.currentTime);
+            if (resource.inGainNode) {
+                resource.inGainNode.gain.setValueAtTime(this.inVolume, this.audioContext.currentTime);
+            }
         })
     }
 
     public setOutVolume = (volume: number) => {
         this.outVolume = this.clamp(volume, 0, 1);
-        this.outGainNodes.forEach(gainNode => {
+        this.resources.forEach(resource => {
             if (!this.audioContext)
             {
                 this.audioContext = new AudioContext();
             }
-            gainNode.gain.setValueAtTime(this.outVolume, this.audioContext.currentTime);
+            if (resource.outGainNode) {
+                resource.outGainNode.gain.setValueAtTime(this.outVolume, this.audioContext.currentTime);
+            }
         })
     }
 
@@ -260,21 +224,16 @@ class VoiceChatClient {
         });
         this.audioLevelList.clear();
 
-        if (this.inAnalyzerNodes.size > 0) {
-            let inAudioLevel;
-            if (this.mute) {
-                inAudioLevel = 0;
-            }
-            else {
-                const inAnalyzerNode = this.inAnalyzerNodes.values().next().value;
-                inAudioLevel = this.getAudioLevel(inAnalyzerNode);
-            }
+        const resource = [...this.resources.values()].find(resource => !resource.inAnalyzerNode);
+        if (resource && resource.inAnalyzerNode) {
+            const inAudioLevel = this.mute ? 0 : this.getAudioLevel(resource.inAnalyzerNode);
             this.audioLevelList.set(localId, inAudioLevel);
         }
-        let outAudioLevel;
-        this.outAnalyzerNodes.forEach((outAnalyzerNode, id) => {
-            outAudioLevel = this.getAudioLevel(outAnalyzerNode);
-            this.audioLevelList.set(id, outAudioLevel);
+        this.resources.forEach((resource, id) => {
+            if (resource.outAnalyzerNode) {
+                const outAudioLevel = this.getAudioLevel(resource.outAnalyzerNode);
+                this.audioLevelList.set(id, outAudioLevel);
+            }
         });
 
         this.previousAudioLevelList.forEach((level, id) => {
