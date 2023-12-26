@@ -31,8 +31,6 @@ class VoiceChatAdapter {
 
         addAction(this.withPrefix("SetOutVolume"), (volume: string) => this.getVoiceChatClient().setOutVolume(Number(volume)));
 
-        addAction(this.withPrefix("AudioLevelChangeHandler"), () => this.getVoiceChatClient().handleAudioLevels());
-
         addAction(this.withPrefix("Clear"), () => this.getVoiceChatClient().clear());
     };
 

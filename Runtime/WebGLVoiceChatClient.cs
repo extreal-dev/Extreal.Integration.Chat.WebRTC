@@ -34,15 +34,12 @@ namespace Extreal.Integration.Chat.WebRTC
                 initialMute = voiceChatConfig.InitialMute,
                 initialInVolume = voiceChatConfig.InitialInVolume,
                 initialOutVolume = voiceChatConfig.InitialOutVolume,
+                initialAudioLevelCheckIntervalSeconds = voiceChatConfig.InitialAudioLevelCheckIntervalSeconds,
                 isDebug = Logger.IsDebug()
             };
             var jsonVoiceChatConfig = JsonSerializer.Serialize(config);
             WebGLHelper.CallAction(WithPrefix(nameof(WebGLVoiceChatClient)), jsonVoiceChatConfig);
             WebGLHelper.AddCallback(WithPrefix(nameof(HandleOnAudioLevelChanged)), HandleOnAudioLevelChanged);
-
-            Observable.EveryUpdate()
-                .Subscribe(_ => AudioLevelChangeHandler())
-                .AddTo(disposables);
         }
 
         public override bool HasMicrophone()
@@ -82,8 +79,6 @@ namespace Extreal.Integration.Chat.WebRTC
 
         private static string WithPrefix(string name) => $"{nameof(WebGLVoiceChatClient)}#{name}";
 
-        private static void AudioLevelChangeHandler() => WebGLHelper.CallAction(WithPrefix(nameof(AudioLevelChangeHandler)));
-
         [MonoPInvokeCallback(typeof(Action<string, string>))]
         private static void HandleOnAudioLevelChanged(string audioLevelListStr, string unused)
         {
@@ -107,6 +102,7 @@ namespace Extreal.Integration.Chat.WebRTC
         public bool initialMute { get; set; }
         public float initialInVolume { get; set; }
         public float initialOutVolume { get; set; }
+        public float initialAudioLevelCheckIntervalSeconds { get; set; }
         public bool isDebug { get; set; }
     }
 }

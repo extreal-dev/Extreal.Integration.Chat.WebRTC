@@ -4,6 +4,7 @@ type VoiceChatConfig = {
     initialMute: boolean;
     initialInVolume: number;
     initialOutVolume: number;
+    initialAudioLevelCheckIntervalSeconds: number;
     isDebug: boolean;
 };
 
@@ -32,6 +33,7 @@ class VoiceChatClient {
     private mute: boolean;
     private inVolume: number;
     private outVolume: number;
+    private audioLevelCheckIntervalSeconds: number;
 
     private audioContext: AudioContext | undefined;
 
@@ -47,6 +49,7 @@ class VoiceChatClient {
         this.mute = voiceChatConfig.initialMute;
         this.inVolume = voiceChatConfig.initialInVolume;
         this.outVolume = voiceChatConfig.initialOutVolume;
+        this.audioLevelCheckIntervalSeconds = voiceChatConfig.initialAudioLevelCheckIntervalSeconds;
         this.getPeerClient = getPeerClient;
         this.hasMicrophone = hasMicrophone;
         this.peerConnectionIds = new Set();
@@ -79,6 +82,8 @@ class VoiceChatClient {
         document.getElementById("unity-canvas")?.addEventListener("touchstart", audioContextResumeFunc);
         document.getElementById("unity-canvas")?.addEventListener("mousedown", audioContextResumeFunc);
         document.getElementById("unity-canvas")?.addEventListener("keydown", audioContextResumeFunc);
+
+        setInterval(this.handleAudioLevels, this.audioLevelCheckIntervalSeconds * 1000);
     }
 
     private createPc = async (id: string, isOffer: boolean, pc: RTCPeerConnection) => {
