@@ -21,7 +21,7 @@ namespace Extreal.Integration.Chat.WebRTC
         private readonly VoiceChatConfig voiceChatConfig;
         private readonly Dictionary<string, (
             NativeInOutAudio inOutAudio, MediaStream inStream,
-            AudioStreamTrack inTrack, MediaStream outStream)> resources;
+            AudioStreamTrack inTrack, RTCRtpTransceiver inTransceiver, MediaStream outStream)> resources;
 
         private readonly Transform voiceChatContainer;
 
@@ -53,7 +53,7 @@ namespace Extreal.Integration.Chat.WebRTC
 
             resources = new Dictionary<string, (
                 NativeInOutAudio inOutAudio, MediaStream inStream,
-                AudioStreamTrack inTrack, MediaStream outStream)>();
+                AudioStreamTrack inTrack, RTCRtpTransceiver inTransceiver, MediaStream outStream)>();
             this.peerClient = peerClient;
             this.voiceChatConfig = voiceChatConfig;
             mute = voiceChatConfig.InitialMute;
@@ -94,12 +94,13 @@ namespace Extreal.Integration.Chat.WebRTC
 
             var inOutAudio = GetInOutAudio();
 
-            inOutAudio.InAudio.volume = inVolume;
-
             MediaStream inStream = null;
             AudioStreamTrack inTrack = null;
+            RTCRtpTransceiver inTransceiver = null;
             if (HasMicrophone())
             {
+                inOutAudio.InAudio.volume = inVolume;
+
                 inTrack = new AudioStreamTrack(inOutAudio.InAudio)
                 {
                     Loopback = false
@@ -110,6 +111,10 @@ namespace Extreal.Integration.Chat.WebRTC
                 {
                     Logger.LogDebug($"AddTrack(IN): id={id}");
                 }
+            }
+            else
+            {
+                inTransceiver = pc.AddTransceiver(TrackKind.Audio, new RTCRtpTransceiverInit { direction = RTCRtpTransceiverDirection.RecvOnly });
             }
 
             var outStream = new MediaStream();
@@ -136,7 +141,7 @@ namespace Extreal.Integration.Chat.WebRTC
                 }
             };
 
-            resources.Add(id, (inOutAudio, inStream, inTrack, outStream));
+            resources.Add(id, (inOutAudio, inStream, inTrack, inTransceiver, outStream));
         }
 
         private NativeInOutAudio GetInOutAudio()
@@ -199,6 +204,12 @@ namespace Extreal.Integration.Chat.WebRTC
             if (resource.inTrack != null)
             {
                 resource.inTrack.Dispose();
+            }
+
+            if (resource.inTransceiver != null)
+            {
+                resource.inTransceiver.Stop();
+                resource.inTransceiver.Dispose();
             }
 
             if (resource.outStream != null)

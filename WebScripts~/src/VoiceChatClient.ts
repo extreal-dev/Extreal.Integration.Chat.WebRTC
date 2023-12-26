@@ -21,6 +21,7 @@ class VoiceChatClient {
     private peerConnectionIds: Set<string>;
     private inStreams: Map<string, MediaStream>;
     private inTracks: Map<string, MediaStreamTrack>;
+    private inTransceivers: Map<string, RTCRtpTransceiver>;
     private outAudios: Map<string, HTMLAudioElement>;
     private outStreams: Map<string, MediaStream>;
 
@@ -55,6 +56,7 @@ class VoiceChatClient {
         this.peerConnectionIds = new Set();
         this.inStreams = new Map();
         this.inTracks = new Map();
+        this.inTransceivers = new Map();
         this.outAudios = new Map();
         this.outStreams = new Map();
         this.getPeerClient().addPcCreateHook(this.createPc);
@@ -125,6 +127,9 @@ class VoiceChatClient {
             client.inGainNodes.set(id, inGainNode);
             client.inAnalyzerNodes.set(id, inAnalyzerNode);
         }
+        else {
+            this.inTransceivers.set(id, pc.addTransceiver("audio", { direction: "recvonly" }));
+        }
 
         const outAudio = new Audio();
         client.outAudios.set(id, outAudio);
@@ -161,6 +166,11 @@ class VoiceChatClient {
         if (outAudio) {
             outAudio.pause();
             this.outAudios.delete(id);
+        }
+        const inTransceivers = this.inTransceivers.get(id);
+        if (inTransceivers) {
+            inTransceivers.stop();
+            this.inTransceivers.delete(id);
         }
         const outStream = this.outStreams.get(id);
         if (outStream) {
