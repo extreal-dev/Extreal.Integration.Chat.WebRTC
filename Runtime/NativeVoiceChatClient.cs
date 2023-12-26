@@ -1,4 +1,5 @@
 ﻿#if !UNITY_WEBGL || UNITY_EDITOR
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -7,6 +8,7 @@ using Extreal.Integration.P2P.WebRTC;
 using UniRx;
 using Unity.WebRTC;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Extreal.Integration.Chat.WebRTC
 {
@@ -30,6 +32,7 @@ namespace Extreal.Integration.Chat.WebRTC
         private bool mute;
         private float inVolume;
         private float outVolume;
+        private float audioLevelCheckIntervalSeconds;
         private float[] samples = new float[2048];
 
         private readonly Dictionary<string, float> audioLevelList = new Dictionary<string, float>();
@@ -59,6 +62,7 @@ namespace Extreal.Integration.Chat.WebRTC
             mute = voiceChatConfig.InitialMute;
             inVolume = voiceChatConfig.InitialInVolume;
             outVolume = voiceChatConfig.InitialOutVolume;
+            audioLevelCheckIntervalSeconds = voiceChatConfig.InitialAudioLevelCheckIntervalSeconds;
             peerClient.AddPcCreateHook(CreatePc);
             peerClient.AddPcCloseHook(ClosePc);
 
@@ -79,7 +83,7 @@ namespace Extreal.Integration.Chat.WebRTC
                 .Subscribe(_ => ownId = null)
                 .AddTo(disposables);
 
-            Observable.EveryUpdate()
+            Observable.Interval(TimeSpan.FromSeconds(audioLevelCheckIntervalSeconds))
                 .Subscribe(_ => AudioLevelChangeHandler())
                 .AddTo(disposables);
         }
