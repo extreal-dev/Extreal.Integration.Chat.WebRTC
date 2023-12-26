@@ -100,7 +100,6 @@ namespace Extreal.Integration.Chat.WebRTC
             if (HasMicrophone())
             {
                 inOutAudio.InAudio.volume = inVolume;
-
                 inTrack = new AudioStreamTrack(inOutAudio.InAudio)
                 {
                     Loopback = false
@@ -236,7 +235,10 @@ namespace Extreal.Integration.Chat.WebRTC
             resources.Values.ToList().ForEach(resource =>
             {
                 var inAudio = resource.inOutAudio.InAudio;
-                inAudio.mute = mute;
+                if (inAudio != null)
+                {
+                    inAudio.mute = mute;
+                }
             });
             FireOnMuted(mute);
         }
