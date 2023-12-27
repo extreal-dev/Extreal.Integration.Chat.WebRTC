@@ -166,6 +166,7 @@ class VoiceChatClient {
         if (resource.outStream) {
             resource.outStream.getTracks().forEach((track) => track.stop());
         }
+        this.resources.delete(id);
     };
 
     public clear = () => {
@@ -224,7 +225,7 @@ class VoiceChatClient {
         });
         this.audioLevelList.clear();
 
-        const resource = [...this.resources.values()].find(resource => !resource.inAnalyzerNode);
+        const resource = [...this.resources.values()].find(resource => resource.inAnalyzerNode);
         if (resource && resource.inAnalyzerNode) {
             const inAudioLevel = this.mute ? 0 : this.getAudioLevel(resource.inAnalyzerNode);
             this.audioLevelList.set(localId, inAudioLevel);
