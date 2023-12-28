@@ -69,6 +69,10 @@ namespace Extreal.Integration.Chat.WebRTC
             if (Microphone.devices.Length > 0)
             {
                 mic = Microphone.Start(null, true, 1, 48000);
+                while (Microphone.GetPosition(null) > 0)
+                {
+                    // do nothing
+                }
             }
             if (Logger.IsDebug())
             {
