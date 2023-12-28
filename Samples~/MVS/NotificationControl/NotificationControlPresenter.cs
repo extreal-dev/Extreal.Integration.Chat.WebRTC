@@ -1,4 +1,5 @@
-﻿using Extreal.Core.Common.System;
+﻿using System.Diagnostics.CodeAnalysis;
+using Extreal.Core.Common.System;
 using Extreal.Integration.Chat.WebRTC.MVS.App;
 using UniRx;
 using VContainer.Unity;
@@ -10,6 +11,7 @@ namespace Extreal.Integration.Chat.WebRTC.MVS.NotificationControl
         private readonly AppState appState;
         private readonly NotificationControlView notificationControlView;
 
+        [SuppressMessage("Usage", "CC0033")]
         private readonly CompositeDisposable disposables = new CompositeDisposable();
 
         public NotificationControlPresenter(

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using Extreal.Core.Common.System;
 using Extreal.Integration.P2P.WebRTC;
 using UniRx;
@@ -8,8 +9,10 @@ namespace Extreal.Integration.Chat.WebRTC.MVS.App
     public class AppState : DisposableBase
     {
         public IObservable<string> OnNotificationReceived => onNotificationReceived.AddTo(disposables);
+        [SuppressMessage("Usage", "CC0033")]
         private readonly Subject<string> onNotificationReceived = new Subject<string>();
 
+        [SuppressMessage("Usage", "CC0033")]
         private readonly CompositeDisposable disposables = new CompositeDisposable();
 
         private PeerRole role = PeerRole.Host;

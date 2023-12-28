@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using Extreal.Core.Common.System;
 using UniRx;
 
@@ -20,6 +21,7 @@ namespace Extreal.Integration.Chat.WebRTC
         /// Arg: Received message
         /// </summary>
         public IObservable<string> OnMessageReceived => onMessageReceived.AddTo(Disposables);
+        [SuppressMessage("Usage", "CC0033")]
         private readonly Subject<string> onMessageReceived = new Subject<string>();
 
         /// <inheritdoc/>

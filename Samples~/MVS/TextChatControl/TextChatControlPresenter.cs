@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using Extreal.Core.Common.System;
 using UniRx;
 using VContainer.Unity;
@@ -10,6 +11,7 @@ namespace Extreal.Integration.Chat.WebRTC.MVS.Controls.TextChatControl
         private readonly TextChatClient textChatClient;
         private readonly TextChatControlView textChatControlView;
 
+        [SuppressMessage("Usage", "CC0033")]
         private readonly CompositeDisposable disposables = new CompositeDisposable();
 
         public TextChatControlPresenter

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using Cysharp.Threading.Tasks;
 using Extreal.Core.Common.System;
 using Extreal.Core.StageNavigation;
@@ -15,6 +16,7 @@ namespace Extreal.Integration.Chat.WebRTC.MVS.P2PControl
         private readonly AppState appState;
         private readonly PeerClient peerClient;
 
+        [SuppressMessage("Usage", "CC0033")]
         private readonly CompositeDisposable disposables = new CompositeDisposable();
 
         private Action<string> handleHostNameAlreadyExistsException;

@@ -1,4 +1,6 @@
-﻿using Extreal.Core.Common.System;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text;
+using Extreal.Core.Common.System;
 using UniRx;
 using VContainer.Unity;
 
@@ -10,6 +12,7 @@ namespace Extreal.Integration.Chat.WebRTC.MVS.Controls.VoiceChatControl
         private readonly VoiceChatControlView voiceChatControlView;
         private readonly VoiceChatConfig voiceChatConfig;
 
+        [SuppressMessage("Usage", "CC0033")]
         private readonly CompositeDisposable disposables = new CompositeDisposable();
 
         public VoiceChatControlPresenter
@@ -32,6 +35,34 @@ namespace Extreal.Integration.Chat.WebRTC.MVS.Controls.VoiceChatControl
 
             voiceChatClient.OnMuted
                 .Subscribe(voiceChatControlView.ToggleMute)
+                .AddTo(disposables);
+
+            voiceChatControlView.OnMicVolumeSliderChanged
+                .Subscribe(volume =>
+                {
+                    voiceChatClient.SetInVolume(volume);
+                    voiceChatControlView.SetMicVolumeText(volume);
+                })
+                .AddTo(disposables);
+
+            voiceChatControlView.OnSpeakersVolumeSliderChanged
+                .Subscribe(volume =>
+                {
+                    voiceChatClient.SetOutVolume(volume);
+                    voiceChatControlView.SetSpeakersVolumeText(volume);
+                })
+                .AddTo(disposables);
+
+            voiceChatClient.OnAudioLevelChanged
+                .Subscribe(audioLevelList =>
+                {
+                    var stringBuilder = new StringBuilder();
+                    foreach (var id in audioLevelList.Keys)
+                    {
+                        stringBuilder.Append($"{id}: {audioLevelList[id]:f3}{System.Environment.NewLine}");
+                    }
+                    voiceChatControlView.SetAudioLevelsText(stringBuilder.ToString());
+                })
                 .AddTo(disposables);
 
             voiceChatControlView.Initialize(voiceChatConfig.InitialMute);
