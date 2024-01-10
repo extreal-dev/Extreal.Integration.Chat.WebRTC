@@ -8,7 +8,8 @@
         "Extreal.Core.Logging",
         "Extreal.Core.Common",
         "Extreal.Integration.Web.Common",
-        "Extreal.Integration.P2P.WebRTC"
+        "Extreal.Integration.P2P.WebRTC",
+        "Extreal.Framework.Analyzer"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
