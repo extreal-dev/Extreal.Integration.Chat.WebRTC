@@ -32,7 +32,7 @@ namespace Extreal.Integration.Chat.WebRTC
         private bool mute;
         private float inVolume;
         private float outVolume;
-        private float audioLevelCheckIntervalSeconds;
+        private readonly float audioLevelCheckIntervalSeconds;
         private float[] samples = new float[2048];
 
         private readonly Dictionary<string, float> audioLevelList = new Dictionary<string, float>();
