@@ -4,7 +4,7 @@ type VoiceChatConfig = {
     initialMute: boolean;
     initialInVolume: number;
     initialOutVolume: number;
-    initialAudioLevelCheckIntervalSeconds: number;
+    audioLevelCheckIntervalSeconds: number;
     isDebug: boolean;
 };
 
@@ -50,7 +50,7 @@ class VoiceChatClient {
         this.mute = voiceChatConfig.initialMute;
         this.inVolume = voiceChatConfig.initialInVolume;
         this.outVolume = voiceChatConfig.initialOutVolume;
-        this.audioLevelCheckIntervalSeconds = voiceChatConfig.initialAudioLevelCheckIntervalSeconds;
+        this.audioLevelCheckIntervalSeconds = voiceChatConfig.audioLevelCheckIntervalSeconds;
         this.getPeerClient = getPeerClient;
         this.hasMicrophone = hasMicrophone;
         this.resources = new Map();

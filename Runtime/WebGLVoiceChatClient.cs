@@ -34,7 +34,7 @@ namespace Extreal.Integration.Chat.WebRTC
                 initialMute = voiceChatConfig.InitialMute,
                 initialInVolume = voiceChatConfig.InitialInVolume,
                 initialOutVolume = voiceChatConfig.InitialOutVolume,
-                initialAudioLevelCheckIntervalSeconds = voiceChatConfig.InitialAudioLevelCheckIntervalSeconds,
+                audioLevelCheckIntervalSeconds = voiceChatConfig.AudioLevelCheckIntervalSeconds,
                 isDebug = Logger.IsDebug()
             };
             var jsonVoiceChatConfig = JsonSerializer.Serialize(config);
@@ -102,7 +102,7 @@ namespace Extreal.Integration.Chat.WebRTC
         public bool initialMute { get; set; }
         public float initialInVolume { get; set; }
         public float initialOutVolume { get; set; }
-        public float initialAudioLevelCheckIntervalSeconds { get; set; }
+        public float audioLevelCheckIntervalSeconds { get; set; }
         public bool isDebug { get; set; }
     }
 }

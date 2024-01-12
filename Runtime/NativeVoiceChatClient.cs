@@ -62,7 +62,7 @@ namespace Extreal.Integration.Chat.WebRTC
             mute = voiceChatConfig.InitialMute;
             inVolume = voiceChatConfig.InitialInVolume;
             outVolume = voiceChatConfig.InitialOutVolume;
-            audioLevelCheckIntervalSeconds = voiceChatConfig.InitialAudioLevelCheckIntervalSeconds;
+            audioLevelCheckIntervalSeconds = voiceChatConfig.AudioLevelCheckIntervalSeconds;
             peerClient.AddPcCreateHook(CreatePc);
             peerClient.AddPcCloseHook(ClosePc);
 
