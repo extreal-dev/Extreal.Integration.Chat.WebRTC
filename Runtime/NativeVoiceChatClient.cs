@@ -32,7 +32,6 @@ namespace Extreal.Integration.Chat.WebRTC
         private bool mute;
         private float inVolume;
         private float outVolume;
-        private readonly float audioLevelCheckIntervalSeconds;
         private float[] samples = new float[2048];
 
         private readonly Dictionary<string, float> audioLevelList = new Dictionary<string, float>();
@@ -62,7 +61,6 @@ namespace Extreal.Integration.Chat.WebRTC
             mute = voiceChatConfig.InitialMute;
             inVolume = voiceChatConfig.InitialInVolume;
             outVolume = voiceChatConfig.InitialOutVolume;
-            audioLevelCheckIntervalSeconds = voiceChatConfig.AudioLevelCheckIntervalSeconds;
             peerClient.AddPcCreateHook(CreatePc);
             peerClient.AddPcCloseHook(ClosePc);
 
@@ -87,7 +85,7 @@ namespace Extreal.Integration.Chat.WebRTC
                 .Subscribe(_ => ownId = null)
                 .AddTo(disposables);
 
-            Observable.Interval(TimeSpan.FromSeconds(audioLevelCheckIntervalSeconds))
+            Observable.Interval(TimeSpan.FromSeconds(voiceChatConfig.AudioLevelCheckIntervalSeconds))
                 .Subscribe(_ => AudioLevelChangeHandler())
                 .AddTo(disposables);
         }
