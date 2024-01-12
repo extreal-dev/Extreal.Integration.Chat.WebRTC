@@ -24,6 +24,10 @@ namespace Extreal.Integration.Chat.WebRTC
         /// <value>Initial output volume (0.0 - 1.0)</value>
         public float InitialOutVolume { get; }
 
+        /// <summary>
+        /// Value of audio level check interval.
+        /// </summary>
+        /// <value>Interval to check audioLevel (seconds)</value>
         public float AudioLevelCheckIntervalSeconds { get; }
 
         /// <summary>
@@ -32,7 +36,7 @@ namespace Extreal.Integration.Chat.WebRTC
         /// <param name="initialMute">True if initial muted, false otherwise.</param>
         /// <param name="initialInVolume">Initial input volume (0.0 - 1.0)</param>
         /// <param name="initialOutVolume">Initial output volume (0.0 - 1.0)</param>
-        /// <param name="initialAudioLevelCheckIntervalSeconds">Initial Interval to check audioLevel.</param>
+        /// <param name="audioLevelCheckIntervalSeconds">Interval to check audioLevel (seconds)</param>
         [SuppressMessage("Style", "CC0057")]
         public VoiceChatConfig(bool initialMute = true, float initialInVolume = 1f, float initialOutVolume = 1f, float audioLevelCheckIntervalSeconds = 1f)
         {
