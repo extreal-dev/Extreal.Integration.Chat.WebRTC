@@ -1,6 +1,6 @@
 {
   "name": "@extreal-dev/extreal.integration.chat.webrtc",
-  "version": "1.0.0",
+  "version": "1.1.0-next.1",
   "scripts": {
     "dev": "rollup --config rollup.config.ts --configPlugin typescript",
     "prod": "rollup --config rollup.config.ts --configPlugin typescript --environment BUILD:production"
@@ -31,7 +31,7 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "@extreal-dev/extreal.integration.p2p.webrtc": "^1.0.0",
+    "@extreal-dev/extreal.integration.p2p.webrtc": "^1.1.0-next.2",
     "@extreal-dev/extreal.integration.web.common": "^1.0.0"
   }
 }
