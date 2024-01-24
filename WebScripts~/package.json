@@ -32,6 +32,6 @@
   },
   "dependencies": {
     "@extreal-dev/extreal.integration.p2p.webrtc": "^1.1.0-next.2",
-    "@extreal-dev/extreal.integration.web.common": "^1.1.0-next.1"
+    "@extreal-dev/extreal.integration.web.common": "^1.1.0-next.2"
   }
 }
