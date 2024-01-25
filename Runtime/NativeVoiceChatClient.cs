@@ -34,8 +34,8 @@ namespace Extreal.Integration.Chat.WebRTC
         private float outVolume;
         private float[] samples = new float[2048];
 
-        private readonly Dictionary<string, float> audioLevelList = new Dictionary<string, float>();
-        private readonly Dictionary<string, float> previousAudioLevelList = new Dictionary<string, float>();
+        private readonly Dictionary<string, float> audioLevels = new Dictionary<string, float>();
+        private readonly Dictionary<string, float> previousAudioLevels = new Dictionary<string, float>();
 
         private string ownId;
 
@@ -295,39 +295,39 @@ namespace Extreal.Integration.Chat.WebRTC
                 return;
             }
 
-            previousAudioLevelList.Clear();
-            foreach (var id in audioLevelList.Keys)
+            previousAudioLevels.Clear();
+            foreach (var id in audioLevels.Keys)
             {
-                previousAudioLevelList[id] = audioLevelList[id];
+                previousAudioLevels[id] = audioLevels[id];
             }
-            audioLevelList.Clear();
+            audioLevels.Clear();
 
             var inAudio = resources.Values.Select(resource => resource.inOutAudio.InAudio).FirstOrDefault();
             if (inAudio != null)
             {
                 var inAudioLevel = mute ? 0f : GetAudioLevel(inAudio);
-                audioLevelList[ownId] = inAudioLevel;
+                audioLevels[ownId] = inAudioLevel;
             }
             foreach (var id in resources.Keys)
             {
                 var outAudio = resources[id].inOutAudio.OutAudio;
                 var outAudioLevel = GetAudioLevel(outAudio);
-                audioLevelList[id] = outAudioLevel;
+                audioLevels[id] = outAudioLevel;
             }
 
-            foreach (var id in previousAudioLevelList.Keys)
+            foreach (var id in previousAudioLevels.Keys)
             {
-                if (!audioLevelList.ContainsKey(id) || audioLevelList[id] != previousAudioLevelList[id])
+                if (!audioLevels.ContainsKey(id) || audioLevels[id] != previousAudioLevels[id])
                 {
-                    FireOnAudioLevelChanged(audioLevelList);
+                    FireOnAudioLevelChanged(audioLevels);
                     return;
                 }
             }
-            foreach (var id in audioLevelList.Keys)
+            foreach (var id in audioLevels.Keys)
             {
-                if (!previousAudioLevelList.ContainsKey(id))
+                if (!previousAudioLevels.ContainsKey(id))
                 {
-                    FireOnAudioLevelChanged(audioLevelList);
+                    FireOnAudioLevelChanged(audioLevels);
                     return;
                 }
             }

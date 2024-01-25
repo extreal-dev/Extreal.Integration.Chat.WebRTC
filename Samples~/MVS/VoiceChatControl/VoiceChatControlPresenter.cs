@@ -14,7 +14,7 @@ namespace Extreal.Integration.Chat.WebRTC.MVS.Controls.VoiceChatControl
         private readonly VoiceChatClient voiceChatClient;
         private readonly VoiceChatControlView voiceChatControlView;
         private readonly VoiceChatConfig voiceChatConfig;
-        private Dictionary<string, float> audioLevelList = new Dictionary<string, float>();
+        private Dictionary<string, float> audioLevels = new Dictionary<string, float>();
 
         [SuppressMessage("Usage", "CC0033")]
         private readonly CompositeDisposable disposables = new CompositeDisposable();
@@ -60,9 +60,9 @@ namespace Extreal.Integration.Chat.WebRTC.MVS.Controls.VoiceChatControl
                 .AddTo(disposables);
 
             voiceChatClient.OnAudioLevelChanged
-                .Subscribe(audioLevelList =>
+                .Subscribe(audioLevels =>
                 {
-                    this.audioLevelList = new Dictionary<string, float>(audioLevelList);
+                    this.audioLevels = new Dictionary<string, float>(audioLevels);
                     UpdateAudioLevelText();
                 })
                 .AddTo(disposables);
@@ -77,11 +77,11 @@ namespace Extreal.Integration.Chat.WebRTC.MVS.Controls.VoiceChatControl
         private void UpdateAudioLevelText()
         {
             var stringBuilder = new StringBuilder();
-            foreach (var id in audioLevelList.Keys)
+            foreach (var id in audioLevels.Keys)
             {
                 if (appState.NameDict.TryGetValue(id, out var name))
                 {
-                    stringBuilder.Append($"{name}: {audioLevelList[id]:f3}{System.Environment.NewLine}");
+                    stringBuilder.Append($"{name}: {audioLevels[id]:f3}{System.Environment.NewLine}");
                 }
             }
             voiceChatControlView.SetAudioLevelsText(stringBuilder.ToString());

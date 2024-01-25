@@ -45,8 +45,8 @@ namespace Extreal.Integration.Chat.WebRTC
         /// <summary>
         /// Publishes that the audio levels are changed.
         /// </summary>
-        /// <param name="audioLevelList">ID and audio level pairs (contains unchanged values)</param>
-        protected void FireOnAudioLevelChanged(IReadOnlyDictionary<string, float> audioLevelList) => onAudioLevelChanged.OnNext(audioLevelList);
+        /// <param name="audioLevels">ID and audio level pairs (contains unchanged values)</param>
+        protected void FireOnAudioLevelChanged(IReadOnlyDictionary<string, float> audioLevels) => onAudioLevelChanged.OnNext(audioLevels);
 
         /// <summary>
         /// Returns whether a microphone is available or not.
