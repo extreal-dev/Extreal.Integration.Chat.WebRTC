@@ -9,7 +9,7 @@ type VoiceChatConfig = {
 };
 
 type VoiceChatClientCallBacks = {
-    onAudioLevelChanged: (audioLevels: Map<string, number>) => void;
+    onAudioLevelChanged: (id: string, audioLevel: number) => void;
 };
 
 class Resource {
@@ -38,7 +38,6 @@ class VoiceChatClient {
     private audioContext: AudioContext | undefined;
 
     private audioLevels: Map<string, number>;
-    private previousAudioLevels: Map<string, number>;
 
     private readonly callBacks: VoiceChatClientCallBacks;
 
@@ -58,7 +57,6 @@ class VoiceChatClient {
             console.log(hasMicrophone ? "Microphone found" : "Microphone not found");
         }
         this.audioLevels = new Map<string, number>();
-        this.previousAudioLevels = new Map<string, number>();
 
         const audioContextResumeFunc = () => {
             if (!this.audioContext)
@@ -217,34 +215,29 @@ class VoiceChatClient {
             return
         }
 
-        this.previousAudioLevels.clear();
-        this.audioLevels.forEach((level, id) => {
-            this.previousAudioLevels.set(id, level);
-        });
-        this.audioLevels.clear();
+        this.handleInAudioLevels(localId);
+        this.handleOutAudioLevels();
+    }
 
+    private handleInAudioLevels = (localId: string) => {
         const resource = [...this.resources.values()].find(resource => resource.inAnalyzerNode);
         if (resource && resource.inAnalyzerNode) {
-            const inAudioLevel = this.mute ? 0 : this.getAudioLevel(resource.inAnalyzerNode);
-            this.audioLevels.set(localId, inAudioLevel);
+            const audioLevel = this.mute ? 0 : this.getAudioLevel(resource.inAnalyzerNode);
+            if (!this.audioLevels.has(localId) || this.audioLevels.get(localId) != audioLevel) {
+                this.audioLevels.set(localId, audioLevel);
+                this.callBacks.onAudioLevelChanged(localId, audioLevel);
+            }
         }
+    }
+
+    private handleOutAudioLevels = () => {
         this.resources.forEach((resource, id) => {
             if (resource.outAnalyzerNode) {
-                const outAudioLevel = this.getAudioLevel(resource.outAnalyzerNode);
-                this.audioLevels.set(id, outAudioLevel);
-            }
-        });
-
-        this.previousAudioLevels.forEach((level, id) => {
-            if (!this.audioLevels.has(id) || this.audioLevels.get(id) != level) {
-                this.callBacks.onAudioLevelChanged(this.audioLevels);
-                return;
-            }
-        });
-        this.audioLevels.forEach((_, id) => {
-            if (!this.previousAudioLevels.has(id)) {
-                this.callBacks.onAudioLevelChanged(this.audioLevels);
-                return;
+                const audioLevel = this.getAudioLevel(resource.outAnalyzerNode);
+                if (!this.audioLevels.has(id) || this.audioLevels.get(id) != audioLevel) {
+                    this.audioLevels.set(id, audioLevel);
+                    this.callBacks.onAudioLevelChanged(id, audioLevel);
+                }
             }
         });
     }

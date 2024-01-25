@@ -80,10 +80,10 @@ namespace Extreal.Integration.Chat.WebRTC
         private static string WithPrefix(string name) => $"{nameof(WebGLVoiceChatClient)}#{name}";
 
         [MonoPInvokeCallback(typeof(Action<string, string>))]
-        private static void HandleOnAudioLevelChanged(string audioLevelsStr, string unused)
+        private static void HandleOnAudioLevelChanged(string id, string audioLevelStr)
         {
-            var audioLevels = JsonSerializer.Deserialize<Dictionary<string, float>>(audioLevelsStr);
-            instance.FireOnAudioLevelChanged(audioLevels);
+            var audioLevel = float.Parse(audioLevelStr);
+            instance.FireOnAudioLevelChanged(id, audioLevel);
         }
 
         protected override void ReleaseManagedResources()

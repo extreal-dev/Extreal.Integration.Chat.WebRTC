@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Extreal.Core.Common.System;
 using Extreal.Integration.Chat.WebRTC.MVS.App;
+using Extreal.Integration.P2P.WebRTC;
 using UniRx;
 using VContainer.Unity;
 
@@ -14,7 +15,8 @@ namespace Extreal.Integration.Chat.WebRTC.MVS.Controls.VoiceChatControl
         private readonly VoiceChatClient voiceChatClient;
         private readonly VoiceChatControlView voiceChatControlView;
         private readonly VoiceChatConfig voiceChatConfig;
-        private Dictionary<string, float> audioLevels = new Dictionary<string, float>();
+        private readonly PeerClient peerClient;
+        private readonly Dictionary<string, float> audioLevels = new Dictionary<string, float>();
 
         [SuppressMessage("Usage", "CC0033")]
         private readonly CompositeDisposable disposables = new CompositeDisposable();
@@ -24,13 +26,15 @@ namespace Extreal.Integration.Chat.WebRTC.MVS.Controls.VoiceChatControl
             AppState appState,
             VoiceChatClient voiceChatClient,
             VoiceChatControlView voiceChatControlView,
-            VoiceChatConfig voiceChatConfig
+            VoiceChatConfig voiceChatConfig,
+            PeerClient peerClient
         )
         {
             this.appState = appState;
             this.voiceChatClient = voiceChatClient;
             this.voiceChatControlView = voiceChatControlView;
             this.voiceChatConfig = voiceChatConfig;
+            this.peerClient = peerClient;
         }
 
         public void Initialize()
@@ -60,15 +64,19 @@ namespace Extreal.Integration.Chat.WebRTC.MVS.Controls.VoiceChatControl
                 .AddTo(disposables);
 
             voiceChatClient.OnAudioLevelChanged
-                .Subscribe(audioLevels =>
+                .Subscribe(values =>
                 {
-                    this.audioLevels = new Dictionary<string, float>(audioLevels);
+                    audioLevels[values.id] = values.audioLevel;
                     UpdateAudioLevelText();
                 })
                 .AddTo(disposables);
 
             appState.NameDict.ObserveCountChanged()
                 .Subscribe(_ => UpdateAudioLevelText())
+                .AddTo(disposables);
+
+            peerClient.OnUserDisconnecting
+                .Subscribe(id => audioLevels.Remove(id))
                 .AddTo(disposables);
 
             voiceChatControlView.Initialize(voiceChatConfig.InitialMute);
