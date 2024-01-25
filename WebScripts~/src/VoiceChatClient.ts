@@ -212,7 +212,7 @@ class VoiceChatClient {
     }
 
     public handleAudioLevels = () => {
-        const localId = this.getPeerClient().getSocketId();
+        const localId = this.getPeerClient().getClientId();
         if (!localId) {
             return
         }
