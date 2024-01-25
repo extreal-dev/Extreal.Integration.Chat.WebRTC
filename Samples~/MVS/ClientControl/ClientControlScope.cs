@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Extreal.Integration.Chat.WebRTC.MVS.NameDataControl;
 using Extreal.Integration.P2P.WebRTC;
 using SocketIOClient;
 using VContainer;
@@ -40,6 +41,9 @@ namespace Extreal.Integration.Chat.WebRTC.MVS.ClientControl
             var voiceChatClient = VoiceChatClientProvider.Provide(peerClient, voiceChatConfig);
             builder.RegisterComponent(voiceChatConfig);
             builder.RegisterComponent(voiceChatClient);
+
+            var nameDataClient = NameDataClientProvider.Provide(peerClient);
+            builder.RegisterComponent(nameDataClient);
 
             builder.RegisterEntryPoint<ClientControlPresenter>();
         }

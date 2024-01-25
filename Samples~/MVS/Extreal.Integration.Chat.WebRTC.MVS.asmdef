@@ -3,6 +3,7 @@
     "rootNamespace": "Extreal.Integration.Chat.WebRTC.MVS",
     "references": [
         "Unity.TextMeshPro",
+        "Unity.WebRTC",
         "UniTask",
         "UniRx",
         "VContainer",

@@ -14,6 +14,6 @@ namespace Extreal.Integration.Chat.WebRTC.MVS.App
             => this.stageNavigator = stageNavigator;
 
         public void Start()
-            => stageNavigator.ReplaceAsync(StageName.GroupSelectionStage).Forget();
+            => stageNavigator.ReplaceAsync(StageName.NameSettingStage).Forget();
     }
 }

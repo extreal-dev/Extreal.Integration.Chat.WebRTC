@@ -34,6 +34,10 @@ namespace Extreal.Integration.Chat.WebRTC.MVS.GroupSelectionScreen
 
         public void Initialize()
         {
+            groupSelectionScreenView.OnBackButtonClicked
+                .Subscribe(_ => stageNavigator.ReplaceAsync(StageName.NameSettingStage).Forget())
+                .AddTo(disposables);
+
             groupSelectionScreenView.OnRoleChanged
                 .Subscribe(appState.SetRole)
                 .AddTo(disposables);
