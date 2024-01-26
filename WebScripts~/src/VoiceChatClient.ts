@@ -58,22 +58,31 @@ class VoiceChatClient {
         }
         this.audioLevels = new Map<string, number>();
 
-        const audioContextResumeFunc = () => {
+        const audioContextResume = () => {
             if (!this.audioContext)
             {
                 this.audioContext = new AudioContext();
             }
             this.audioContext.resume();
-            document.getElementById("unity-canvas")?.removeEventListener("touchstart", audioContextResumeFunc);
-            document.getElementById("unity-canvas")?.removeEventListener("mousedown", audioContextResumeFunc);
-            document.getElementById("unity-canvas")?.removeEventListener("keydown", audioContextResumeFunc);
-        };
-        document.getElementById("unity-canvas")?.addEventListener("touchstart", audioContextResumeFunc);
-        document.getElementById("unity-canvas")?.addEventListener("mousedown", audioContextResumeFunc);
-        document.getElementById("unity-canvas")?.addEventListener("keydown", audioContextResumeFunc);
+        }
+
+        this.executeOnceOnSpecifiedEvents("unity-canvas", ["touchstart", "mousedown", "keydown"], audioContextResume);
 
         setInterval(this.handleAudioLevels, voiceChatConfig.audioLevelCheckIntervalSeconds * 1000);
     }
+
+    private executeOnceOnSpecifiedEvents = (targetElementId: string, eventNames: string[], action: () => void) => {
+        const executeActionAndRemove = () => {
+            action();
+            eventNames.forEach(eventName => {
+                document.getElementById(targetElementId)?.removeEventListener(eventName, executeActionAndRemove);
+            });
+        };
+
+        eventNames.forEach(eventName => {
+            document.getElementById(targetElementId)?.addEventListener(eventName, executeActionAndRemove);
+        });
+    };
 
     private createPc = async (id: string, isOffer: boolean, pc: RTCPeerConnection) => {
         if (this.resources.has(id)) {
