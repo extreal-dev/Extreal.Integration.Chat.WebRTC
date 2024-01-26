@@ -58,7 +58,7 @@ class VoiceChatClient {
         }
         this.audioLevels = new Map<string, number>();
 
-        const audioContextResume = () => {
+        const resumeAudioContext = () => {
             if (!this.audioContext)
             {
                 this.audioContext = new AudioContext();
@@ -66,9 +66,9 @@ class VoiceChatClient {
             this.audioContext.resume();
         }
 
-        this.executeOnceOnSpecifiedEvents("unity-canvas", ["touchstart", "mousedown", "keydown"], audioContextResume);
+        this.executeOnceOnSpecifiedEvents("unity-canvas", ["touchstart", "mousedown", "keydown"], resumeAudioContext);
 
-        setInterval(this.handleAudioLevels, voiceChatConfig.audioLevelCheckIntervalSeconds * 1000);
+        setInterval(this.handleAudioLevelChange, voiceChatConfig.audioLevelCheckIntervalSeconds * 1000);
     }
 
     private executeOnceOnSpecifiedEvents = (targetElementId: string, eventNames: string[], action: () => void) => {
@@ -218,17 +218,17 @@ class VoiceChatClient {
         })
     }
 
-    public handleAudioLevels = () => {
+    public handleAudioLevelChange = () => {
         const localId = this.getPeerClient().getClientId();
         if (!localId) {
             return
         }
 
-        this.handleInAudioLevels(localId);
-        this.handleOutAudioLevels();
+        this.handleInAudioLevelChange(localId);
+        this.handleOutAudioLevelChange();
     }
 
-    private handleInAudioLevels = (localId: string) => {
+    private handleInAudioLevelChange = (localId: string) => {
         const resource = [...this.resources.values()].find(resource => resource.inAnalyzerNode);
         if (resource && resource.inAnalyzerNode) {
             const audioLevel = this.mute ? 0 : this.getAudioLevel(resource.inAnalyzerNode);
@@ -239,7 +239,7 @@ class VoiceChatClient {
         }
     }
 
-    private handleOutAudioLevels = () => {
+    private handleOutAudioLevelChange = () => {
         this.resources.forEach((resource, id) => {
             if (resource.outAnalyzerNode) {
                 const audioLevel = this.getAudioLevel(resource.outAnalyzerNode);

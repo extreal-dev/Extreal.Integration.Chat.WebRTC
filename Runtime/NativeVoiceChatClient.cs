@@ -85,7 +85,7 @@ namespace Extreal.Integration.Chat.WebRTC
                 .AddTo(disposables);
 
             Observable.Interval(TimeSpan.FromSeconds(voiceChatConfig.AudioLevelCheckIntervalSeconds))
-                .Subscribe(_ => AudioLevelChangeHandler())
+                .Subscribe(_ => HandleAudioLevelChange())
                 .AddTo(disposables);
         }
 
@@ -287,18 +287,18 @@ namespace Extreal.Integration.Chat.WebRTC
             return audioLevel;
         }
 
-        private void AudioLevelChangeHandler()
+        private void HandleAudioLevelChange()
         {
             if (string.IsNullOrEmpty(ownId))
             {
                 return;
             }
 
-            InAudioLevelChangeHandler();
-            OutAudioLevelChangeHandler();
+            HandleInAudioLevelChange();
+            HandleOutAudioLevelChange();
         }
 
-        private void InAudioLevelChangeHandler()
+        private void HandleInAudioLevelChange()
         {
             var inAudio = resources.Values.Select(resource => resource.inOutAudio.InAudio).FirstOrDefault();
             if (inAudio != null)
@@ -312,7 +312,7 @@ namespace Extreal.Integration.Chat.WebRTC
             }
         }
 
-        private void OutAudioLevelChangeHandler()
+        private void HandleOutAudioLevelChange()
         {
             foreach (var id in resources.Keys)
             {
