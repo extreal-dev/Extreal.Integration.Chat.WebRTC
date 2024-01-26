@@ -1,10 +1,14 @@
 ﻿#if !UNITY_WEBGL || UNITY_EDITOR
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Extreal.Core.Logging;
 using Extreal.Integration.P2P.WebRTC;
+using UniRx;
 using Unity.WebRTC;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Extreal.Integration.Chat.WebRTC
 {
@@ -15,16 +19,27 @@ namespace Extreal.Integration.Chat.WebRTC
     {
         private static readonly ELogger Logger = LoggingManager.GetLogger(nameof(NativeVoiceChatClient));
 
+        private readonly PeerClient peerClient;
         private readonly VoiceChatConfig voiceChatConfig;
         private readonly Dictionary<string, (
             NativeInOutAudio inOutAudio, MediaStream inStream,
-            AudioStreamTrack inTrack, MediaStream outStream)> resources;
+            AudioStreamTrack inTrack, RTCRtpTransceiver inTransceiver, MediaStream outStream)> resources;
 
         private readonly Transform voiceChatContainer;
 
         private readonly AudioClip mic;
 
         private bool mute;
+        private float inVolume;
+        private float outVolume;
+        private float[] samples = new float[2048];
+
+        private readonly Dictionary<string, float> audioLevels = new Dictionary<string, float>();
+
+        private string ownId;
+
+        [SuppressMessage("Usage", "CC0033")]
+        private readonly CompositeDisposable disposables = new CompositeDisposable();
 
         /// <summary>
         /// Creates NativeVoiceChatClient with peerClient and voiceChatConfig.
@@ -39,17 +54,39 @@ namespace Extreal.Integration.Chat.WebRTC
 
             resources = new Dictionary<string, (
                 NativeInOutAudio inOutAudio, MediaStream inStream,
-                AudioStreamTrack inTrack, MediaStream outStream)>();
+                AudioStreamTrack inTrack, RTCRtpTransceiver inTransceiver, MediaStream outStream)>();
+            this.peerClient = peerClient;
             this.voiceChatConfig = voiceChatConfig;
             mute = voiceChatConfig.InitialMute;
+            inVolume = voiceChatConfig.InitialInVolume;
+            outVolume = voiceChatConfig.InitialOutVolume;
             peerClient.AddPcCreateHook(CreatePc);
             peerClient.AddPcCloseHook(ClosePc);
 
-            mic = Microphone.Start(null, true, 1, 48000);
-            while (!(Microphone.GetPosition(null) > 0))
+            if (Microphone.devices.Length > 0)
             {
-                // do nothing
+                mic = Microphone.Start(null, true, 1, 48000);
+                while (Microphone.GetPosition(null) > 0)
+                {
+                    // do nothing
+                }
             }
+            if (Logger.IsDebug())
+            {
+                Logger.LogDebug(HasMicrophone() ? "Microphone found" : "Microphone not found");
+            }
+
+            peerClient.OnStarted
+                .Subscribe(id => ownId = id)
+                .AddTo(disposables);
+
+            peerClient.OnDisconnected
+                .Subscribe(_ => ownId = null)
+                .AddTo(disposables);
+
+            Observable.Interval(TimeSpan.FromSeconds(voiceChatConfig.AudioLevelCheckIntervalSeconds))
+                .Subscribe(_ => HandleAudioLevelChange())
+                .AddTo(disposables);
         }
 
         private void CreatePc(string id, bool isOffer, RTCPeerConnection pc)
@@ -62,15 +99,26 @@ namespace Extreal.Integration.Chat.WebRTC
 
             var inOutAudio = GetInOutAudio();
 
-            var inTrack = new AudioStreamTrack(inOutAudio.InAudio)
+            MediaStream inStream = null;
+            AudioStreamTrack inTrack = null;
+            RTCRtpTransceiver inTransceiver = null;
+            if (HasMicrophone())
             {
-                Loopback = false
-            };
-            var inStream = new MediaStream();
-            pc.AddTrack(inTrack, inStream);
-            if (Logger.IsDebug())
+                inOutAudio.InAudio.volume = inVolume;
+                inTrack = new AudioStreamTrack(inOutAudio.InAudio)
+                {
+                    Loopback = false
+                };
+                inStream = new MediaStream();
+                pc.AddTrack(inTrack, inStream);
+                if (Logger.IsDebug())
+                {
+                    Logger.LogDebug($"AddTrack(IN): id={id}");
+                }
+            }
+            else
             {
-                Logger.LogDebug($"AddTrack(IN): id={id}");
+                inTransceiver = pc.AddTransceiver(TrackKind.Audio, new RTCRtpTransceiverInit { direction = RTCRtpTransceiverDirection.RecvOnly });
             }
 
             var outStream = new MediaStream();
@@ -97,7 +145,7 @@ namespace Extreal.Integration.Chat.WebRTC
                 }
             };
 
-            resources.Add(id, (inOutAudio, inStream, inTrack, outStream));
+            resources.Add(id, (inOutAudio, inStream, inTrack, inTransceiver, outStream));
         }
 
         private NativeInOutAudio GetInOutAudio()
@@ -106,20 +154,24 @@ namespace Extreal.Integration.Chat.WebRTC
             var inOutAudio = inOutAudioGo.AddComponent<NativeInOutAudio>();
             inOutAudioGo.transform.SetParent(voiceChatContainer);
 
-            var inAudioGo = new GameObject("InAudio");
-            var inAudio = inAudioGo.AddComponent<AudioSource>();
-            inAudioGo.transform.SetParent(inOutAudioGo.transform);
+            AudioSource inAudio = null;
+            if (HasMicrophone())
+            {
+                var inAudioGo = new GameObject("InAudio");
+                inAudio = inAudioGo.AddComponent<AudioSource>();
+                inAudioGo.transform.SetParent(inOutAudioGo.transform);
+
+                inAudio.loop = true;
+                inAudio.clip = mic;
+                inAudio.Play();
+                inAudio.mute = mute;
+            }
 
             var outAudioGo = new GameObject("OutAudio", typeof(AudioSourceLogger));
             var outAudio = outAudioGo.AddComponent<AudioSource>();
             outAudioGo.transform.SetParent(inOutAudioGo.transform);
 
             inOutAudio.Initialize(inAudio, outAudio);
-
-            inAudio.loop = true;
-            inAudio.clip = mic;
-            inAudio.Play();
-            inAudio.mute = mute;
 
             outAudio.loop = true;
             outAudio.Play();
@@ -147,25 +199,75 @@ namespace Extreal.Integration.Chat.WebRTC
                 Object.Destroy(resource.inOutAudio.gameObject);
             }
 
-            resource.inStream.GetTracks().ToList().ForEach((track) => track.Stop());
-            resource.inStream.Dispose();
-            resource.inTrack.Dispose();
-            resource.outStream.GetTracks().ToList().ForEach((track) => track.Stop());
-            resource.outStream.Dispose();
+            if (resource.inStream != null)
+            {
+                resource.inStream.GetTracks().ToList().ForEach((track) => track.Stop());
+                resource.inStream.Dispose();
+            }
+
+            if (resource.inTrack != null)
+            {
+                resource.inTrack.Dispose();
+            }
+
+            if (resource.inTransceiver != null)
+            {
+                resource.inTransceiver.Stop();
+                resource.inTransceiver.Dispose();
+            }
+
+            if (resource.outStream != null)
+            {
+                resource.outStream.GetTracks().ToList().ForEach((track) => track.Stop());
+                resource.outStream.Dispose();
+            }
 
             resources.Remove(id);
         }
 
         /// <inheritdoc/>
+        public override bool HasMicrophone() => mic != null;
+
+        /// <inheritdoc/>
         public override void ToggleMute()
         {
+            if (!HasMicrophone())
+            {
+                return;
+            }
+
             mute = !mute;
             resources.Values.ToList().ForEach(resource =>
             {
                 var inAudio = resource.inOutAudio.InAudio;
-                inAudio.mute = mute;
+                if (inAudio != null)
+                {
+                    inAudio.mute = mute;
+                }
             });
             FireOnMuted(mute);
+        }
+
+        /// <inheritdoc/>
+        public override void SetInVolume(float volume)
+        {
+            inVolume = Mathf.Clamp(volume, 0f, 1f);
+            resources.Values.ToList().ForEach(resource =>
+            {
+                var inAudio = resource.inOutAudio.InAudio;
+                inAudio.volume = inVolume;
+            });
+        }
+
+        /// <inheritdoc/>
+        public override void SetOutVolume(float volume)
+        {
+            outVolume = Mathf.Clamp(volume, 0f, 1f);
+            resources.Values.ToList().ForEach(resource =>
+            {
+                var outAudio = resource.inOutAudio.OutAudio;
+                outAudio.volume = outVolume;
+            });
         }
 
         /// <inheritdoc/>
@@ -174,6 +276,54 @@ namespace Extreal.Integration.Chat.WebRTC
             resources.Keys.ToList().ForEach(ClosePc);
             resources.Clear();
             mute = voiceChatConfig.InitialMute;
+            inVolume = voiceChatConfig.InitialInVolume;
+            outVolume = voiceChatConfig.InitialOutVolume;
+        }
+
+        private float GetAudioLevel(AudioSource audioSource)
+        {
+            audioSource.GetOutputData(samples, 0);
+            var audioLevel = samples.Average(Mathf.Abs);
+            return audioLevel;
+        }
+
+        private void HandleAudioLevelChange()
+        {
+            if (string.IsNullOrEmpty(ownId))
+            {
+                return;
+            }
+
+            HandleInAudioLevelChange();
+            HandleOutAudioLevelChange();
+        }
+
+        private void HandleInAudioLevelChange()
+        {
+            var inAudio = resources.Values.Select(resource => resource.inOutAudio.InAudio).FirstOrDefault();
+            if (inAudio != null)
+            {
+                var audioLevel = mute ? 0f : GetAudioLevel(inAudio);
+                if (!audioLevels.ContainsKey(ownId) || audioLevels[ownId] != audioLevel)
+                {
+                    audioLevels[ownId] = audioLevel;
+                    FireOnAudioLevelChanged(ownId, audioLevel);
+                }
+            }
+        }
+
+        private void HandleOutAudioLevelChange()
+        {
+            foreach (var id in resources.Keys)
+            {
+                var outAudio = resources[id].inOutAudio.OutAudio;
+                var audioLevel = GetAudioLevel(outAudio);
+                if (!audioLevels.ContainsKey(id) || audioLevels[id] != audioLevel)
+                {
+                    audioLevels[id] = audioLevel;
+                    FireOnAudioLevelChanged(id, audioLevel);
+                }
+            }
         }
 
         /// <inheritdoc/>
@@ -181,6 +331,7 @@ namespace Extreal.Integration.Chat.WebRTC
         {
             Microphone.End(null);
             Object.Destroy(voiceChatContainer);
+            disposables.Dispose();
             base.ReleaseManagedResources();
         }
     }

@@ -45,7 +45,7 @@ namespace Extreal.Integration.Chat.WebRTC
         private static string WithPrefix(string name) => $"{nameof(WebGLTextChatClient)}#{name}";
     }
 
-    [SuppressMessage("Usage", "IDE1006")]
+    [SuppressMessage("Usage", "IDE1006"), SuppressMessage("Usage", "CC0047")]
     public class WebGLTextChatConfig
     {
         public bool isDebug { get; set; }
