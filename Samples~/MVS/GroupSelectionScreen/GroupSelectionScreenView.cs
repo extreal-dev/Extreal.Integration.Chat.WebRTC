@@ -11,11 +11,14 @@ namespace Extreal.Integration.Chat.WebRTC.MVS.GroupSelectionScreen
 {
     public class GroupSelectionScreenView : MonoBehaviour
     {
+        [SerializeField] private Button backButton;
         [SerializeField] private TMP_Dropdown roleDropdown;
         [SerializeField] private TMP_InputField groupNameInputField;
         [SerializeField] private TMP_Dropdown groupDropdown;
         [SerializeField] private Button updateButton;
         [SerializeField] private Button goButton;
+
+        public IObservable<Unit> OnBackButtonClicked => backButton.OnClickAsObservable().TakeUntilDestroy(this);
 
         public IObservable<PeerRole> OnRoleChanged =>
             roleDropdown.onValueChanged.AsObservable()

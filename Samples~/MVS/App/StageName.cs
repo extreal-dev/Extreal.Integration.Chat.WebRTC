@@ -4,5 +4,6 @@
     {
         GroupSelectionStage = 0,
         VirtualStage = 1,
+        NameSettingStage = 2
     }
 }

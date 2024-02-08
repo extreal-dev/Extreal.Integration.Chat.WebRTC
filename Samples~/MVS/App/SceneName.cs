@@ -11,9 +11,11 @@
         TextChatControl = 106,
         VoiceChatControl = 107,
         SpaceControl = 108,
+        NameDataControl = 109,
 
         // Screen
         GroupSelectionScreen = 200,
+        NameSettingScreen = 201,
 
         // Space
         VirtualSpace = 300,

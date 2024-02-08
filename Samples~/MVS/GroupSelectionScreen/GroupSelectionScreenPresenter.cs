@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using Extreal.Core.Common.System;
 using Extreal.Core.StageNavigation;
@@ -16,6 +17,7 @@ namespace Extreal.Integration.Chat.WebRTC.MVS.GroupSelectionScreen
         private readonly GroupSelectionScreenView groupSelectionScreenView;
         private readonly GroupProvider groupProvider;
 
+        [SuppressMessage("Usage", "CC0033")]
         private readonly CompositeDisposable disposables = new CompositeDisposable();
 
         public GroupSelectionScreenPresenter(
@@ -32,6 +34,10 @@ namespace Extreal.Integration.Chat.WebRTC.MVS.GroupSelectionScreen
 
         public void Initialize()
         {
+            groupSelectionScreenView.OnBackButtonClicked
+                .Subscribe(_ => stageNavigator.ReplaceAsync(StageName.NameSettingStage).Forget())
+                .AddTo(disposables);
+
             groupSelectionScreenView.OnRoleChanged
                 .Subscribe(appState.SetRole)
                 .AddTo(disposables);
