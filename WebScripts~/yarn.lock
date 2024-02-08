@@ -2,18 +2,18 @@
 # yarn lockfile v1
 
 
-"@extreal-dev/extreal.integration.p2p.webrtc@^1.0.0":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@extreal-dev/extreal.integration.p2p.webrtc/-/extreal.integration.p2p.webrtc-1.0.3.tgz#09193016e977f7295e0dd34c6cc63a1b65357a10"
-  integrity sha512-qUQ01h6hCVymCflq0tHTshSTNKvlt1AFi9gHb06vtgaXgcvmeIu7TxEh05lDzfUTzmHHqXHib1vDd3tLTcWjAg==
+"@extreal-dev/extreal.integration.p2p.webrtc@1.1.0-next.3":
+  version "1.1.0-next.3"
+  resolved "https://registry.yarnpkg.com/@extreal-dev/extreal.integration.p2p.webrtc/-/extreal.integration.p2p.webrtc-1.1.0-next.3.tgz#bcaca99eb428bb2ca77705c3b4ac75034cff6a5c"
+  integrity sha512-E1A0NKNpoeJTKgu47ZbFBD3eGKGcaN2Vj1QZKdV4szDauvAnBwB7Gt9IL97dSvf8m4hN8nWrPmIZI+YiDVfIrw==
   dependencies:
-    "@extreal-dev/extreal.integration.web.common" "^1.0.0"
-    socket.io-client "^4.7.1"
+    "@extreal-dev/extreal.integration.web.common" "1.1.0-next.2"
+    socket.io-client "4.7.4"
 
-"@extreal-dev/extreal.integration.web.common@^1.0.0":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@extreal-dev/extreal.integration.web.common/-/extreal.integration.web.common-1.0.3.tgz#094bcb46aa1994177d1a1f624f31c1181f1f525b"
-  integrity sha512-ntZmw43lJK2JnXRGQ8WTv86aKMZMQotcZFAYx2DPLJBCS3ZqjOL7kcdwKfFMgp2UEdR+/VP88gobHkTMQPOdyw==
+"@extreal-dev/extreal.integration.web.common@1.1.0-next.2":
+  version "1.1.0-next.2"
+  resolved "https://registry.yarnpkg.com/@extreal-dev/extreal.integration.web.common/-/extreal.integration.web.common-1.1.0-next.2.tgz#752a8c9b89a4d92e49220b75cf39cb7070434a03"
+  integrity sha512-1xnnY+qGaL48bKy9X+ZStEO2yQ7xku4ChHvrADmtyFYlUMV2bhZUyxLkGrljFRp2qmor488AU29/UK5AibfkaQ==
 
 "@jridgewell/gen-mapping@^0.3.0":
   version "0.3.3"
@@ -381,7 +381,7 @@ smob@^1.0.0:
   resolved "https://registry.yarnpkg.com/smob/-/smob-1.4.1.tgz#66270e7df6a7527664816c5b577a23f17ba6f5b5"
   integrity sha512-9LK+E7Hv5R9u4g4C3p+jjLstaLe11MDsL21UpYaCNmapvMkYhqCV4A/f/3gyH8QjMyh6l68q9xC85vihY9ahMQ==
 
-socket.io-client@^4.7.1:
+socket.io-client@4.7.4:
   version "4.7.4"
   resolved "https://registry.yarnpkg.com/socket.io-client/-/socket.io-client-4.7.4.tgz#5f0e060ff34ac0a4b4c5abaaa88e0d1d928c64c8"
   integrity sha512-wh+OkeF0rAVCrABWQBaEjLfb7DVPotMbu0cgWgyR0v6eA4EoVnAwcIeIbcdTE3GT/H3kbdLl7OoH2+asoDRIIg==
