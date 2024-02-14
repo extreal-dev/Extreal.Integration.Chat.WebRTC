@@ -1,5 +1,5 @@
 import { PeerClientProvider } from "@extreal-dev/extreal.integration.p2p.webrtc";
-import { addAction, addFunction, callback } from "@extreal-dev/extreal.integration.web.common";
+import { addAction, addFunction, callback, suppressTraceLog } from "@extreal-dev/extreal.integration.web.common";
 import { VoiceChatClient } from "./VoiceChatClient";
 
 let hasMicrophone = false;
@@ -15,6 +15,10 @@ let hasMicrophone = false;
 
 class VoiceChatAdapter {
     private voiceChatClient: VoiceChatClient | undefined;
+
+    constructor() {
+        suppressTraceLog(this.withPrefix("HandleOnAudioLevelChanged"));
+    }
 
     public adapt = (getPeerClient: PeerClientProvider) => {
         addAction(this.withPrefix("WebGLVoiceChatClient"), (jsonConfig) => {
