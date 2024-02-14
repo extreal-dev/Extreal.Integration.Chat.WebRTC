@@ -167,7 +167,7 @@ namespace Extreal.Integration.Chat.WebRTC
                 inAudio.mute = mute;
             }
 
-            var outAudioGo = new GameObject("OutAudio", typeof(AudioSourceLogger));
+            var outAudioGo = new GameObject("OutAudio");
             var outAudio = outAudioGo.AddComponent<AudioSource>();
             outAudioGo.transform.SetParent(inOutAudioGo.transform);
 
