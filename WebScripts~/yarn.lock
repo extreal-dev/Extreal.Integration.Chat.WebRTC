@@ -2,24 +2,18 @@
 # yarn lockfile v1
 
 
-"@extreal-dev/extreal.integration.chat.webrtc@../../../../../../Packages/Extreal.Integration.Chat.WebRTC/WebScripts~/":
-  version "1.1.0-next.2"
+"@extreal-dev/extreal.integration.p2p.webrtc@1.1.0-next.4":
+  version "1.1.0-next.4"
+  resolved "https://registry.yarnpkg.com/@extreal-dev/extreal.integration.p2p.webrtc/-/extreal.integration.p2p.webrtc-1.1.0-next.4.tgz#e046d0ec6b4a52e9081a7ee2454e28337db76dac"
+  integrity sha512-Zd0i9EbAixMink96yAX/oYRcBqQSLEGssjpIr+eeXmKT/StkSS3V2F0uPbCTkGYi2R9MwL/NRAtU8ZZRuqy48w==
   dependencies:
-    "@extreal-dev/extreal.integration.p2p.webrtc" "1.1.0-next.3"
-    "@extreal-dev/extreal.integration.web.common" "1.1.0-next.2"
-
-"@extreal-dev/extreal.integration.p2p.webrtc@1.1.0-next.3":
-  version "1.1.0-next.3"
-  resolved "https://registry.yarnpkg.com/@extreal-dev/extreal.integration.p2p.webrtc/-/extreal.integration.p2p.webrtc-1.1.0-next.3.tgz#bcaca99eb428bb2ca77705c3b4ac75034cff6a5c"
-  integrity sha512-E1A0NKNpoeJTKgu47ZbFBD3eGKGcaN2Vj1QZKdV4szDauvAnBwB7Gt9IL97dSvf8m4hN8nWrPmIZI+YiDVfIrw==
-  dependencies:
-    "@extreal-dev/extreal.integration.web.common" "1.1.0-next.2"
+    "@extreal-dev/extreal.integration.web.common" "1.1.0-next.3"
     socket.io-client "4.7.4"
 
-"@extreal-dev/extreal.integration.web.common@1.1.0-next.2":
-  version "1.1.0-next.2"
-  resolved "https://registry.yarnpkg.com/@extreal-dev/extreal.integration.web.common/-/extreal.integration.web.common-1.1.0-next.2.tgz#752a8c9b89a4d92e49220b75cf39cb7070434a03"
-  integrity sha512-1xnnY+qGaL48bKy9X+ZStEO2yQ7xku4ChHvrADmtyFYlUMV2bhZUyxLkGrljFRp2qmor488AU29/UK5AibfkaQ==
+"@extreal-dev/extreal.integration.web.common@1.1.0-next.3":
+  version "1.1.0-next.3"
+  resolved "https://registry.yarnpkg.com/@extreal-dev/extreal.integration.web.common/-/extreal.integration.web.common-1.1.0-next.3.tgz#bd277a92f7b262c6882e57fc19704884ec2649a2"
+  integrity sha512-NO3d65FG47yigviEmm+qpEQEGAEUNRRrIC0Rx43c98a1OOayQ1EKC8qz7I8IWrTm5BXbYYyher9xs/x06/tgMg==
 
 "@jridgewell/gen-mapping@^0.3.0":
   version "0.3.3"
