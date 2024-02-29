@@ -19,7 +19,7 @@ class VoiceChatAdapter {
     public adapt = (getPeerClient: PeerClientProvider) => {
         addAction(this.withPrefix("WebGLVoiceChatClient"), (jsonConfig) => {
             this.voiceChatClient = new VoiceChatClient(JSON.parse(jsonConfig), getPeerClient, hasMicrophone, {
-                onAudioLevelChanged: (id, audioLevel) => callback(this.withPrefix("HandleOnAudioLevelChanged"), id, audioLevel.toString()),
+                onAudioLevelChanged: (id, audioLevel) => callback(this.withPrefix("HandleOnAudioLevelChanged"), id, audioLevel.toString(), true),
             });
         });
 
