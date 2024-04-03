@@ -251,6 +251,11 @@ namespace Extreal.Integration.Chat.WebRTC
         /// <inheritdoc/>
         public override void SetInVolume(float volume)
         {
+            if (!HasMicrophone())
+            {
+                return;
+            }
+
             inVolume = Mathf.Clamp(volume, 0f, 1f);
             resources.Values.ToList().ForEach(resource =>
             {
