@@ -26,7 +26,7 @@ namespace Extreal.Integration.Chat.WebRTC
 
         /// <summary>
         /// <para>Invokes when there is a change in audio level at the specified frequency.</para>
-        /// Arg: Client ID and value is audio level (contains unchanged values)
+        /// Arg: Client ID and audio level value
         /// </summary>
         public IObservable<(string id, float audioLevel)> OnAudioLevelChanged => onAudioLevelChanged.AddTo(Disposables);
         [SuppressMessage("Usage", "CC0033")]
