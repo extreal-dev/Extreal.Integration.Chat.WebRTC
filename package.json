@@ -1,6 +1,6 @@
 {
   "name": "jp.co.tis.extreal.integration.chat.webrtc",
-  "version": "1.1.0-next.5",
+  "version": "1.1.0",
   "displayName": "Extreal.Integration.Chat.WebRTC",
   "unity": "2022.3",
   "author": {
@@ -11,9 +11,9 @@
     "com.cysharp.unitask": "2.5.0",
     "com.neuecc.unirx": "7.1.0",
     "jp.co.tis.extreal.core.logging": "1.2.0",
-    "jp.co.tis.extreal.core.common": "1.2.0-next.1",
-    "jp.co.tis.extreal.integration.web.common": "1.1.0-next.4",
-    "jp.co.tis.extreal.integration.p2p.webrtc": "1.1.0-next.5"
+    "jp.co.tis.extreal.core.common": "1.2.0",
+    "jp.co.tis.extreal.integration.web.common": "1.1.0",
+    "jp.co.tis.extreal.integration.p2p.webrtc": "1.1.0"
   },
   "samples": [
     {
