@@ -126,7 +126,15 @@ namespace Extreal.Integration.Chat.WebRTC
 #if UNITY_ANDROID
             if (!Permission.HasUserAuthorizedPermission(Permission.Microphone))
             {
-                Permission.RequestUserPermission(Permission.Microphone);
+                var callbacks = new PermissionCallbacks();
+                var requestCompleted = false;
+                callbacks.PermissionGranted += _ => requestCompleted = true;
+                callbacks.PermissionDenied += _ => requestCompleted = true;
+                callbacks.PermissionDeniedAndDontAskAgain += _ => requestCompleted = true;
+
+                Permission.RequestUserPermission(Permission.Microphone, callbacks);
+
+                await UniTask.WaitUntil(() => requestCompleted);
             }
 #endif
         }
