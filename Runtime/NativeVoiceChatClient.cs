@@ -390,15 +390,18 @@ namespace Extreal.Integration.Chat.WebRTC
 
         private void StopMicrophone()
         {
-            Microphone.End(null);
-            mic = null;
+            if (mic != null)
+            {
+                Microphone.End(null);
+                mic = null;
+            }
             isMicrophoneInitialized = false;
         }
 
         /// <inheritdoc/>
         protected override void ReleaseManagedResources()
         {
-            Microphone.End(null);
+            StopMicrophone();
             Object.Destroy(voiceChatContainer);
             disposables.Dispose();
             base.ReleaseManagedResources();
