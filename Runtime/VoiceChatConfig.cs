@@ -31,19 +31,27 @@ namespace Extreal.Integration.Chat.WebRTC
         public float AudioLevelCheckIntervalSeconds { get; }
 
         /// <summary>
+        /// Whether microphone permission check is required or not.
+        /// </summary>
+        /// <value>True if microphone permission check is required, false otherwise.</value>
+        public bool IsMicrophonePermissionCheckRequired { get; }
+
+        /// <summary>
         /// Creates VoiceChatConfig with initialMute.
         /// </summary>
         /// <param name="initialMute">True if initial muted, false otherwise.</param>
         /// <param name="initialInVolume">Initial input volume (0.0 - 1.0)</param>
         /// <param name="initialOutVolume">Initial output volume (0.0 - 1.0)</param>
         /// <param name="audioLevelCheckIntervalSeconds">Interval to check audioLevel (seconds)</param>
+        /// <param name="isMicrophonePermissionCheckRequired">True if microphone permission check is required, false otherwise.</param>
         [SuppressMessage("Style", "CC0057")]
-        public VoiceChatConfig(bool initialMute = true, float initialInVolume = 1f, float initialOutVolume = 1f, float audioLevelCheckIntervalSeconds = 1f)
+        public VoiceChatConfig(bool initialMute = true, float initialInVolume = 1f, float initialOutVolume = 1f, float audioLevelCheckIntervalSeconds = 1f, bool isMicrophonePermissionCheckRequired = true)
         {
             InitialMute = initialMute;
             InitialInVolume = Mathf.Clamp(initialInVolume, 0f, 1f);
             InitialOutVolume = Mathf.Clamp(initialOutVolume, 0f, 1f);
             AudioLevelCheckIntervalSeconds = audioLevelCheckIntervalSeconds;
+            IsMicrophonePermissionCheckRequired = isMicrophonePermissionCheckRequired;
         }
     }
 }

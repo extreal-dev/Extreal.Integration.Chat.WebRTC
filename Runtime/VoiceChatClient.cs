@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using Cysharp.Threading.Tasks;
 using Extreal.Core.Common.System;
 using UniRx;
 
@@ -52,7 +53,7 @@ namespace Extreal.Integration.Chat.WebRTC
         /// Returns whether a microphone is available or not.
         /// </summary>
         /// <returns>True if it is available, false otherwise</returns>
-        public abstract bool HasMicrophone();
+        public abstract UniTask<bool> HasMicrophoneAsync();
 
         /// <summary>
         /// Toggles mute or not.
