@@ -121,6 +121,7 @@ namespace Extreal.Integration.Chat.WebRTC
 #if UNITY_IOS
             if (!Application.HasUserAuthorization(UserAuthorization.Microphone))
             {
+                // Not covered by testing as this code only passes on iOS
                 await Application.RequestUserAuthorization(UserAuthorization.Microphone);
             }
 #endif
@@ -128,6 +129,7 @@ namespace Extreal.Integration.Chat.WebRTC
 #if UNITY_ANDROID
             if (!Permission.HasUserAuthorizedPermission(Permission.Microphone))
             {
+                // Not covered by testing as this code only passes on Android
                 var callbacks = new PermissionCallbacks();
                 var requestCompleted = false;
                 callbacks.PermissionGranted += _ => requestCompleted = true;
