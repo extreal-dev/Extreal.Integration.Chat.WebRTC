@@ -41,14 +41,14 @@
   - Clients can leave the group (client exit)
   - Ability to send text (text chat)
   - Ability to talk (voice chat)
-    - Ability to request microphone permission*
+    - Ability to request microphone permission\*
     - Ability to toggle microphone mute
     - Ability to adjust microphone volume
     - Ability to adjust other people's volume
     - Ability to obtain own and others' voice volume at a specified frequency
     - Abilities other than the microphone can be used if the microphone is not available
   - Ability to return to the group selection screen (host stop)
-- Items marked with * should be tested only on mobile.
+- Items marked with \* should be tested only on mobile.
 
 ### Client
 
@@ -57,11 +57,11 @@
 - Virtual space
   - Ability to send text (text chat)
   - Ability to talk (voice chat)
-    - Ability to request microphone permission*
+    - Ability to request microphone permission\*
     - Ability to toggle microphone mute
     - Ability to adjust microphone volume
     - Ability to adjust other people's volume
     - Ability to obtain own and others' voice volume at a specified frequency
     - Abilities other than the microphone can be used if the microphone is not available
   - Ability to return to the group selection screen while moving the player (leave host)
-- Items marked with * should be tested only on mobile.
+- Items marked with \* should be tested only on mobile.
