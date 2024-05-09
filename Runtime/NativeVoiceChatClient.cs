@@ -115,7 +115,7 @@ namespace Extreal.Integration.Chat.WebRTC
             }
         }
 
-#pragma warning disable CS1998
+        [SuppressMessage("Usage", "IDE0022")]
         private async UniTask RequestMicrophonePermissionAsync()
         {
 #if UNITY_IOS
@@ -124,9 +124,7 @@ namespace Extreal.Integration.Chat.WebRTC
                 // Not covered by testing as this code only passes on iOS
                 await Application.RequestUserAuthorization(UserAuthorization.Microphone);
             }
-#endif
-
-#if UNITY_ANDROID
+#elif UNITY_ANDROID
             if (!Permission.HasUserAuthorizedPermission(Permission.Microphone))
             {
                 // Not covered by testing as this code only passes on Android
@@ -140,9 +138,10 @@ namespace Extreal.Integration.Chat.WebRTC
 
                 await UniTask.WaitUntil(() => requestCompleted);
             }
+#else
+            await UniTask.CompletedTask;
 #endif
         }
-#pragma warning restore CS1998
 
         [SuppressMessage("Usage", "IDE0022")]
         private bool HasMicrophonePermission()

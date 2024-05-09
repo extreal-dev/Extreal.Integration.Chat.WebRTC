@@ -42,9 +42,7 @@ namespace Extreal.Integration.Chat.WebRTC
             WebGLHelper.AddCallback(WithPrefix(nameof(HandleOnAudioLevelChanged)), HandleOnAudioLevelChanged);
         }
 
-#pragma warning disable CS1998
-        public override async UniTask<bool> HasMicrophoneAsync() => HasMicrophone();
-#pragma warning restore CS1998
+        public override async UniTask<bool> HasMicrophoneAsync() => await UniTask.FromResult(HasMicrophone());
 
         private bool HasMicrophone()
         {
