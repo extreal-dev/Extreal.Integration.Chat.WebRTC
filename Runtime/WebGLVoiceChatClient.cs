@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using AOT;
+using Cysharp.Threading.Tasks;
 using Extreal.Core.Logging;
 using Extreal.Integration.Web.Common;
 using UniRx;
@@ -41,7 +42,9 @@ namespace Extreal.Integration.Chat.WebRTC
             WebGLHelper.AddCallback(WithPrefix(nameof(HandleOnAudioLevelChanged)), HandleOnAudioLevelChanged);
         }
 
-        public override bool HasMicrophone()
+        public override UniTask<bool> HasMicrophoneAsync() => UniTask.FromResult(HasMicrophone());
+
+        private bool HasMicrophone()
         {
             var hasMicrophone = WebGLHelper.CallFunction(WithPrefix(nameof(HasMicrophone)));
             return bool.Parse(hasMicrophone);
