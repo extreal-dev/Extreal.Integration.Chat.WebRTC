@@ -44,8 +44,6 @@ namespace Extreal.Integration.Chat.WebRTC.MVS.ClientControl
 
             var nameDataClient = NameDataClientProvider.Provide(peerClient);
             builder.RegisterComponent(nameDataClient);
-
-            builder.RegisterEntryPoint<ClientControlPresenter>();
         }
     }
 }
