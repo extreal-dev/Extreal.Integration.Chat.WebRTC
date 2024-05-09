@@ -9,8 +9,10 @@ using Extreal.Integration.P2P.WebRTC;
 using UniRx;
 using Unity.WebRTC;
 using UnityEngine;
-using UnityEngine.Android;
 using Object = UnityEngine.Object;
+#if UNITY_ANDROID
+using UnityEngine.Android;
+#endif
 
 namespace Extreal.Integration.Chat.WebRTC
 {
